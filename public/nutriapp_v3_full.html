@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="Caio César">
+<meta name="creator" content="Caio César (@CaioANQ)">
+<meta name="copyright" content="Caio César">
 <title>NutriApp v3 — App do Paciente + Painel Admin</title>
 <style>
 :root {
@@ -111,6 +114,7 @@ body { font-family: var(--font-sans); background: #e8e8e8; min-height: 100vh; pa
 .admin-sb { width: 150px; background: #0A2E20; flex-shrink: 0; display: flex; flex-direction: column; padding: 8px 0; overflow-y: auto; }
 .admin-logout { margin: auto 8px 0; padding: 8px 10px; border: 0.5px solid rgba(255,255,255,.10); border-radius: var(--border-radius-md); background: rgba(255,255,255,.04); color: rgba(255,255,255,.62); font-family: var(--font-sans); font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; }
 .admin-logout:hover { background: rgba(184,222,202,.10); border-color: rgba(184,222,202,.24); color: #fff; }
+.admin-signature { padding: 8px 10px 2px; font-size: 9px; line-height: 1.5; color: rgba(255,255,255,.34); text-align: center; }
 .asi { display: flex; align-items: center; gap: 8px; padding: 9px 14px; cursor: pointer; border-left: 2px solid transparent; transition: background .12s; }
 .asi:hover { background: rgba(255,255,255,.05); }
 .asi.on { background: rgba(184,222,202,.1); border-left-color: #B8DECA; }
@@ -204,6 +208,7 @@ body { font-family: var(--font-sans); background: #e8e8e8; min-height: 100vh; pa
       <div class="asi" data-ap="relatorios"><span class="asi-ic">📈</span><span class="asi-lb">Relatórios</span></div>
       <div class="asi" data-ap="ia"><span class="asi-ic">🧠</span><span class="asi-lb">IA Clínica</span></div>
       <button type="button" class="admin-logout" onclick="logout()"><span>↩</span><span>Sair</span></button>
+      <div class="admin-signature">Projeto por Caio César<br>@CaioANQ</div>
     </div>
     <div class="admin-content" id="admin-content"></div>
   </div>

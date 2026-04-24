@@ -2,6 +2,7 @@
   "name": "nutriapp-backend",
   "version": "1.0.0",
   "description": "NutriApp API — Node.js + Express + TypeScript",
+  "author": "Caio César (https://github.com/CaioANQ)",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

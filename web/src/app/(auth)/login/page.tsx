@@ -137,6 +137,9 @@ export default function LoginPage() {
             <strong>Lei Geral de Proteção de Dados (LGPD)</strong>.
             Acesso exclusivo a usuários cadastrados.
           </p>
+          <p className="text-[11px] text-gray-400 text-center mt-3">
+            Projeto por Caio César · @CaioANQ
+          </p>
         </div>
       </div>
     </div>

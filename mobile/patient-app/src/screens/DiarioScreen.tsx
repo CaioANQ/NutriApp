@@ -195,6 +195,7 @@ export function DiarioScreen() {
           </TouchableOpacity>
         </View>
       )}
+      <Text style={styles.signature}>Projeto por Caio César · @CaioANQ</Text>
     </ScrollView>
   );
 }
@@ -253,4 +254,5 @@ const styles = StyleSheet.create({
     padding: 10, borderWidth: 0.5, borderColor: 'rgba(22,163,74,0.2)',
   },
   onePerDayText: { fontSize: 11, color: '#166534', lineHeight: 16 },
+  signature: { marginTop: 16, textAlign: 'center', fontSize: 11, color: '#9CA3AF' },
 });

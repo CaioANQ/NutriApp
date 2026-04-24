@@ -4,6 +4,12 @@
   "private": true,
   "type": "module",
   "description": "NutriApp exportado com servidor local seguro, proxy server-side de IA e artefatos visuais preservados.",
+  "author": "Caio César (https://github.com/CaioANQ)",
+  "homepage": "https://nutriapp-gamma.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CaioANQ/NutriApp.git"
+  },
   "scripts": {
     "build": "node scripts/security-check.mjs",
     "dev": "node server.mjs",

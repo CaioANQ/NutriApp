@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="Caio César">
+<meta name="creator" content="Caio César (@CaioANQ)">
+<meta name="copyright" content="Caio César">
 <title>NutriApp — Plataforma de Nutrição Personalizada</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -47,6 +50,8 @@ input,select,textarea,button{font-family:'DM Sans',sans-serif;}
 .btn-login{width:100%;padding:13px;background:var(--forest);color:#fff;border:none;border-radius:var(--r2);font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;letter-spacing:.2px;}
 .btn-login:hover{background:var(--sage);transform:translateY(-1px);}
 .login-lgpd{font-size:11px;color:var(--muted);text-align:center;margin-top:20px;line-height:1.6;}
+.project-signature{font-size:10px;color:var(--muted);text-align:center;margin-top:8px;letter-spacing:.2px;}
+.sb-signature{display:block;margin-top:8px;color:rgba(255,255,255,.34);}
 .err-box{background:var(--red-lt);border:1px solid rgba(184,50,50,.2);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:16px;}
 
 /* ── APP SHELL ── */
@@ -344,6 +349,7 @@ select.fi{-webkit-appearance:none;cursor:pointer;}
       <div class="field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <button class="btn-login" onclick="doLogin()" id="btn-login">Entrar na plataforma</button>
       <div class="login-lgpd">🔒 Dados protegidos conforme a <strong>LGPD</strong> · Acesso exclusivo a usuários autorizados</div>
+      <div class="project-signature">Projeto por Caio César · @CaioANQ</div>
     </div>
   </div>
 </div>
@@ -370,6 +376,7 @@ select.fi{-webkit-appearance:none;cursor:pointer;}
     <div class="sb-foot">
       <button type="button" class="sb-logout" onclick="logout()"><span>↩</span><span>Sair</span></button>
       🔒 LGPD compliant · Dados criptografados · Uso profissional exclusivo
+      <span class="sb-signature">Projeto por Caio César · @CaioANQ</span>
     </div>
   </aside>
   <div class="main">

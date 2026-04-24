@@ -1,5 +1,7 @@
 # NutriApp — Arquitetura Técnica e Segurança
 
+Assinatura do projeto: Caio César — GitHub `@CaioANQ`.
+
 ## Por que React + Next.js?
 
 Segundo o Stack Overflow Developer Survey 2025 (49.000+ devs):

@@ -218,6 +218,7 @@ export function CardapioScreen() {
           );
         })
       )}
+      <Text style={styles.signature}>Projeto por Caio César · @CaioANQ</Text>
     </ScrollView>
   );
 }
@@ -286,4 +287,5 @@ const styles = StyleSheet.create({
   foodName: { fontSize: 13, color: '#111827', fontWeight: '400' },
   foodQty: { fontSize: 10, color: '#9CA3AF', marginTop: 1 },
   foodKcal: { fontSize: 12, fontWeight: '600', color: SAGE },
+  signature: { marginTop: 12, textAlign: 'center', fontSize: 11, color: '#9CA3AF' },
 });

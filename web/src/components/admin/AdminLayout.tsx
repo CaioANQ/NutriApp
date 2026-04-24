@@ -112,6 +112,9 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
           <p className="text-[10px] text-white/20 leading-relaxed">
             🔒 LGPD compliant · Dados criptografados · Uso profissional exclusivo
           </p>
+          <p className="text-[10px] text-white/35 leading-relaxed mt-2">
+            Projeto por Caio César · @CaioANQ
+          </p>
         </div>
       </aside>
 

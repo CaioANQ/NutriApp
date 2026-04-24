@@ -128,6 +128,7 @@ export function FeedbackScreen() {
             <Text style={styles.sendBtnText}>📤 Enviar resposta</Text>
           )}
         </TouchableOpacity>
+        <Text style={styles.signature}>Projeto por Caio César · @CaioANQ</Text>
         <View style={{ height: insets.bottom }} />
       </KeyboardAvoidingView>
     );
@@ -155,6 +156,7 @@ export function FeedbackScreen() {
           keyExtractor={(item) => item.id}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={GREEN} />}
           contentContainerStyle={{ padding: 14, paddingBottom: insets.bottom + 24 }}
+          ListFooterComponent={<Text style={styles.signature}>Projeto por Caio César · @CaioANQ</Text>}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={[styles.entryCard, !item.isReadByAdmin && styles.entryCardUnread]}
@@ -235,4 +237,5 @@ const styles = StyleSheet.create({
   sendBtn: { backgroundColor: GREEN, borderRadius: 12, paddingVertical: 14, alignItems: 'center' },
   sendBtnDisabled: { opacity: 0.5 },
   sendBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  signature: { marginTop: 14, textAlign: 'center', fontSize: 11, color: '#9CA3AF' },
 });

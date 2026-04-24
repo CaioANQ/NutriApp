@@ -2,6 +2,7 @@
   "name": "nutriapp-web",
   "version": "1.0.0",
   "private": true,
+  "author": "Caio César (https://github.com/CaioANQ)",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

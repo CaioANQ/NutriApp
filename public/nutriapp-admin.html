@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="Caio César">
+<meta name="creator" content="Caio César (@CaioANQ)">
+<meta name="copyright" content="Caio César">
 <title>NutriApp — Painel do Nutricionista</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -43,6 +46,7 @@ a { color: var(--sage); }
 .si-ct { background: var(--terra); color: #fff; font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 700; }
 .sb-foot { padding: 14px 18px; margin-top: auto; border-top: 1px solid rgba(255,255,255,.07); font-size: 10px; color: rgba(255,255,255,.2); line-height: 1.7; }
 .sb-foot a { color: rgba(184,222,202,.5); }
+.sb-signature { display: block; margin-top: 8px; color: rgba(255,255,255,.34); }
 .sb-logout { width: 100%; margin: 0 0 10px; padding: 9px 10px; border-radius: var(--r); border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04); color: rgba(255,255,255,.58); font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .15s; }
 .sb-logout:hover { background: rgba(184,222,202,.10); border-color: rgba(184,222,202,.22); color: #fff; }
 
@@ -268,6 +272,7 @@ select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.o
     <div class="sb-foot">
       <button type="button" class="sb-logout" onclick="logout()"><span>↩</span><span>Sair</span></button>
       🔒 LGPD Compliant<br>Dados criptografados<br>Uso profissional exclusivo
+      <span class="sb-signature">Projeto por Caio César · @CaioANQ</span>
     </div>
   </aside>
 

@@ -1,5 +1,7 @@
 # NutriApp — Projeto Exportado com Camada Segura
 
+**Assinatura do projeto:** desenvolvido por Caio César — [@CaioANQ](https://github.com/CaioANQ).
+
 Este diretório contém o projeto importado do pacote exportado e uma versão servida localmente com o design visual preservado. Os HTMLs originais continuam intactos em `../NutriApp_Completo`; as cópias seguras ficam em `public/`.
 
 ## Rodar Localmente

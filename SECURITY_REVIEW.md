@@ -2,6 +2,8 @@
 
 Data da revisão: 2026-04-23.
 
+Assinatura do projeto: Caio César — GitHub `@CaioANQ`.
+
 ## Referências Oficiais
 
 - LGPD, Lei 13.709/2018, texto compilado no Planalto: dados de saúde são dados pessoais sensíveis no art. 5º, II; direitos do titular no art. 18; registro das operações no art. 37; encarregado no art. 41; medidas de segurança no art. 46.
