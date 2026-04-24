@@ -1,0 +1,322 @@
+// backend/prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN    // Nutricionista
+  PATIENT  // Paciente
+}
+
+enum ActivityLevel {
+  SEDENTARY    // Sedentário
+  LIGHT        // Leve (1-3x/sem)
+  MODERATE     // Moderado (3-5x/sem)
+  ACTIVE       // Ativo (6-7x/sem)
+  VERY_ACTIVE  // Muito ativo
+}
+
+enum Goal {
+  DEFICIT      // Perda de peso
+  MAINTENANCE  // Manutenção
+  SURPLUS      // Ganho de massa
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum ConsentStatus {
+  GRANTED
+  REVOKED
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  DATA_ACCESS
+  DATA_MODIFICATION
+  DATA_DELETION
+  DATA_EXPORT
+  PLAN_CREATED
+  PLAN_UPDATED
+  FEEDBACK_SENT
+  DIARY_SAVED
+  CONSENT_GRANTED
+  CONSENT_REVOKED
+}
+
+// ─── MODELS ───────────────────────────────────────────────────────────────────
+
+model User {
+  id                String          @id @default(uuid())
+  email             String          @unique
+  passwordHash      String          @map("password_hash")
+  role              Role
+  isActive          Boolean         @default(true)
+  failedLoginCount  Int             @default(0) @map("failed_login_count")
+  lockedUntil       DateTime?       @map("locked_until")
+  lastLoginAt       DateTime?       @map("last_login_at")
+  lastLoginIp       String?         @map("last_login_ip")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  deletedAt         DateTime?       @map("deleted_at")
+
+  // Relations
+  nutritionist      Nutritionist?
+  patient           Patient?
+  refreshTokens     RefreshToken[]
+  auditLogs         AuditLog[]
+  consents          LgpdConsent[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  token       String   @unique
+  userId      String   @map("user_id")
+  expiresAt   DateTime @map("expires_at")
+  revokedAt   DateTime? @map("revoked_at")
+  deviceInfo  String?  @map("device_info")
+  ipAddress   String?  @map("ip_address")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+model Nutritionist {
+  id         String    @id @default(uuid())
+  userId     String    @unique @map("user_id")
+  name       String
+  crnNumber  String    @unique @map("crn_number")
+  specialty  String?
+  photoUrl   String?   @map("photo_url")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  patients   Patient[]
+
+  @@map("nutritionists")
+}
+
+model Patient {
+  id                String        @id @default(uuid())
+  userId            String        @unique @map("user_id")
+  nutritionistId    String        @map("nutritionist_id")
+  name              String
+  // Dados sensíveis criptografados com AES-256
+  dateOfBirth       String        @map("date_of_birth") // criptografado
+  genderEncrypted   String        @map("gender_encrypted") // criptografado
+  phoneEncrypted    String?       @map("phone_encrypted")  // criptografado
+  // Dados clínicos — também criptografados
+  weightEncrypted   String        @map("weight_encrypted")
+  heightEncrypted   String        @map("height_encrypted")
+  bodyFatEncrypted  String?       @map("body_fat_encrypted")
+  activityLevel     ActivityLevel @map("activity_level")
+  goal              Goal
+  conditions        String[]      @default([])
+  notesEncrypted    String?       @map("notes_encrypted")  // criptografado
+  // IIFYM calculado e armazenado
+  targetKcal        Int?          @map("target_kcal")
+  targetProtein     Int?          @map("target_protein")
+  targetCarbs       Int?          @map("target_carbs")
+  targetFat         Int?          @map("target_fat")
+  waterTargetMl     Int           @default(2000) @map("water_target_ml")
+  photoUrl          String?       @map("photo_url")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+  deletedAt         DateTime?     @map("deleted_at")
+
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nutritionist      Nutritionist  @relation(fields: [nutritionistId], references: [id])
+  mealPlans         MealPlan[]
+  diaryEntries      DiaryEntry[]
+  feedbackMessages  FeedbackMessage[]
+  adherenceLogs     AdherenceLog[]
+
+  @@index([nutritionistId])
+  @@index([deletedAt])
+  @@map("patients")
+}
+
+model TacoFood {
+  id           Int     @id @default(autoincrement())
+  name         String
+  category     String
+  kcalPer100g  Float   @map("kcal_per_100g")
+  carbsPer100g Float   @map("carbs_per_100g")
+  proteinPer100g Float @map("protein_per_100g")
+  fatPer100g   Float   @map("fat_per_100g")
+  fiberPer100g Float   @map("fiber_per_100g")
+  isActive     Boolean @default(true) @map("is_active")
+
+  mealPlanItems MealPlanItem[]
+
+  @@index([name])
+  @@index([category])
+  @@map("taco_foods")
+}
+
+model MealPlan {
+  id          String       @id @default(uuid())
+  patientId   String       @map("patient_id")
+  name        String       @default("Plano alimentar")
+  validFrom   DateTime     @map("valid_from")
+  validTo     DateTime?    @map("valid_to")
+  isActive    Boolean      @default(true) @map("is_active")
+  notes       String?
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  items       MealPlanItem[]
+
+  @@index([patientId])
+  @@index([isActive])
+  @@map("meal_plans")
+}
+
+model MealPlanItem {
+  id          String    @id @default(uuid())
+  mealPlanId  String    @map("meal_plan_id")
+  tacoFoodId  Int       @map("taco_food_id")
+  mealName    String    @map("meal_name") // Café, Almoço, etc.
+  quantityG   Float     @map("quantity_g")
+  orderIndex  Int       @default(0) @map("order_index")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  mealPlan    MealPlan  @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  tacoFood    TacoFood  @relation(fields: [tacoFoodId], references: [id])
+
+  @@index([mealPlanId])
+  @@map("meal_plan_items")
+}
+
+model DiaryEntry {
+  id               String   @id @default(uuid())
+  patientId        String   @map("patient_id")
+  entryDate        DateTime @map("entry_date") @db.Date
+  // Texto criptografado com AES-256
+  textEncrypted    String   @map("text_encrypted")
+  moodEmoji        String?  @map("mood_emoji")
+  checkedFoodIds   Int[]    @default([]) @map("checked_food_ids")
+  waterConsumedMl  Int      @default(0) @map("water_consumed_ml")
+  isReadByAdmin    Boolean  @default(false) @map("is_read_by_admin")
+  readAt           DateTime? @map("read_at")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  patient          Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@unique([patientId, entryDate])
+  @@index([patientId])
+  @@index([isReadByAdmin])
+  @@map("diary_entries")
+}
+
+model FeedbackMessage {
+  id           String    @id @default(uuid())
+  patientId    String    @map("patient_id")
+  // Conteúdo criptografado
+  textEncrypted String   @map("text_encrypted")
+  isFromPatient Boolean  @map("is_from_patient")
+  isRead       Boolean   @default(false) @map("is_read")
+  readAt       DateTime? @map("read_at")
+  sentAt       DateTime  @default(now()) @map("sent_at")
+
+  patient      Patient   @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+  @@index([isRead])
+  @@map("feedback_messages")
+}
+
+model AdherenceLog {
+  id          String   @id @default(uuid())
+  patientId   String   @map("patient_id")
+  logDate     DateTime @map("log_date") @db.Date
+  adherencePct Float   @map("adherence_pct")
+  totalKcal   Int?     @map("total_kcal")
+  waterMl     Int?     @map("water_ml")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@unique([patientId, logDate])
+  @@index([patientId])
+  @@map("adherence_logs")
+}
+
+// ─── LGPD ─────────────────────────────────────────────────────────────────────
+
+model LgpdConsent {
+  id           String        @id @default(uuid())
+  userId       String        @map("user_id")
+  consentType  String        @map("consent_type") // data_processing, health_data, marketing
+  status       ConsentStatus
+  ipAddress    String?       @map("ip_address")
+  userAgent    String?       @map("user_agent")
+  grantedAt    DateTime?     @map("granted_at")
+  revokedAt    DateTime?     @map("revoked_at")
+  version      String        // versão dos termos aceitos
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([consentType])
+  @@map("lgpd_consents")
+}
+
+model LgpdDataRequest {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  requestType String    @map("request_type") // export, deletion, correction
+  status      String    @default("pending")  // pending, processing, completed, rejected
+  requestedAt DateTime  @default(now()) @map("requested_at")
+  completedAt DateTime? @map("completed_at")
+  notes       String?
+  downloadUrl String?   @map("download_url")
+
+  @@index([userId])
+  @@index([status])
+  @@map("lgpd_data_requests")
+}
+
+// ─── AUDITORIA ────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id           String      @id @default(uuid())
+  userId       String?     @map("user_id")
+  action       AuditAction
+  resource     String?
+  resourceId   String?     @map("resource_id")
+  ipAddress    String?     @map("ip_address")
+  userAgent    String?     @map("user_agent")
+  metadata     Json?
+  success      Boolean     @default(true)
+  errorMessage String?     @map("error_message")
+  timestamp    DateTime    @default(now())
+
+  user         User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+  @@map("audit_logs")
+}

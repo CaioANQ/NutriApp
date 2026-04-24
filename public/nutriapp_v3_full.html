@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriApp v3 — App do Paciente + Painel Admin</title>
+<style>
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f5f5;
+  --color-background-tertiary: #eeeeee;
+  --color-text-primary: #111111;
+  --color-text-secondary: #555555;
+  --color-border-tertiary: rgba(0,0,0,0.12);
+  --color-border-secondary: rgba(0,0,0,0.22);
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-xl: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background-primary: #1e1e1e;
+    --color-background-secondary: #2a2a2a;
+    --color-background-tertiary: #333333;
+    --color-text-primary: #f0f0f0;
+    --color-text-secondary: #aaaaaa;
+    --color-border-tertiary: rgba(255,255,255,0.12);
+    --color-border-secondary: rgba(255,255,255,0.22);
+  }
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); background: #e8e8e8; min-height: 100vh; padding: 20px; }
+.wrap { display: flex; gap: 16px; max-width: 1100px; margin: 0 auto; }
+/* ─── PATIENT APP ─── */
+.phone { width: 340px; flex-shrink: 0; background: var(--color-background-secondary); border-radius: var(--border-radius-lg); overflow: hidden; border: 0.5px solid var(--color-border-tertiary); display: flex; flex-direction: column; height: 700px; box-shadow: 0 4px 24px rgba(0,0,0,.15); }
+.ph-status { background: #0A2E20; padding: 8px 16px 5px; display: flex; justify-content: space-between; align-items: center; }
+.ph-time { font-size: 12px; font-weight: 500; color: #fff; }
+.ph-icons { font-size: 11px; color: rgba(255,255,255,.7); }
+.ph-header { background: #0A2E20; padding: 6px 14px 14px; display: flex; justify-content: space-between; align-items: center; }
+.ph-brand { font-size: 17px; font-weight: 500; color: #fff; }
+.ph-brand em { color: #B8DECA; font-style: normal; }
+.ph-patient { background: rgba(255,255,255,.12); border: 0.5px solid rgba(255,255,255,.2); border-radius: 20px; padding: 5px 10px; display: flex; align-items: center; gap: 6px; }
+.ph-dot { width: 7px; height: 7px; border-radius: 50%; background: #B8DECA; }
+.ph-pname { font-size: 12px; color: #fff; font-weight: 500; }
+.ph-scroll { flex: 1; overflow-y: auto; padding: 12px; }
+.ph-scroll::-webkit-scrollbar { width: 3px; }
+.ph-scroll::-webkit-scrollbar-thumb { background: var(--color-border-tertiary); }
+.ph-nav { background: var(--color-background-primary); border-top: 0.5px solid var(--color-border-tertiary); display: flex; flex-shrink: 0; }
+.pn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px 10px; border: none; background: none; cursor: pointer; border-top: 2px solid transparent; font-family: var(--font-sans); }
+.pn.on { border-top-color: #0A2E20; }
+.pn-ic { font-size: 17px; }
+.pn-lb { font-size: 9px; color: var(--color-text-secondary); }
+.pn.on .pn-lb { color: #0A2E20; font-weight: 500; }
+.pcard { background: var(--color-background-primary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); padding: 12px; margin-bottom: 8px; }
+.pcard-title { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 8px; }
+.hero-card { background: #0A2E20; border-radius: var(--border-radius-lg); padding: 14px; margin-bottom: 8px; position: relative; overflow: hidden; }
+.hero-card::before { content: ''; position: absolute; top: -30px; right: -30px; width: 120px; height: 120px; border-radius: 50%; background: rgba(184,222,202,.08); }
+.hero-row { display: flex; align-items: center; justify-content: space-between; }
+.hero-greet { font-size: 11px; color: #B8DECA; margin-bottom: 3px; }
+.hero-cal { font-size: 28px; font-weight: 500; color: #fff; line-height: 1; }
+.hero-sub { font-size: 11px; color: rgba(255,255,255,.45); margin-top: 2px; }
+.ring-w { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
+.ring-svg { transform: rotate(-90deg); }
+.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-pct { font-size: 14px; font-weight: 500; color: #fff; }
+.ring-lbl { font-size: 9px; color: #B8DECA; }
+.macro-strip { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 8px; }
+.mc { background: var(--color-background-primary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); padding: 8px 6px; text-align: center; }
+.mc-v { font-size: 15px; font-weight: 500; }
+.mc-l { font-size: 9px; color: var(--color-text-secondary); }
+.mc-bar { height: 3px; background: var(--color-border-tertiary); border-radius: 2px; margin-top: 4px; overflow: hidden; }
+.mc-fill { height: 100%; border-radius: 2px; }
+.food-row { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.food-row:last-child { border-bottom: none; }
+.fchk { width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid #B8DECA; background: var(--color-background-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; transition: all .15s; }
+.fchk.on { background: #0A2E20; border-color: #0A2E20; color: #fff; }
+.fname { font-size: 12px; color: var(--color-text-primary); flex: 1; }
+.fqty { font-size: 10px; color: var(--color-text-secondary); }
+.fkcal { font-size: 11px; font-weight: 500; color: #3D6B52; }
+.water-card { background: #E3EFF8; border-radius: var(--border-radius-md); padding: 10px 12px; margin-bottom: 8px; }
+.water-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.water-title { font-size: 12px; font-weight: 500; color: #185FA5; }
+.water-ct { font-size: 11px; color: #185FA5; opacity: .7; }
+.glasses { display: flex; flex-wrap: wrap; gap: 5px; }
+.glass { width: 28px; height: 34px; border-radius: 4px 4px 5px 5px; border: 1.5px solid #B5D4F4; background: #fff; cursor: pointer; display: flex; align-items: flex-end; overflow: hidden; transition: border-color .15s; }
+.glass.on { border-color: #185FA5; }
+.glass-fill { width: 100%; background: #378ADD; transition: height .25s; }
+.diary-card { background: var(--color-background-primary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); padding: 12px; margin-bottom: 8px; }
+.diary-title { font-size: 12px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.diary-notice { background: #FAEEDA; border-radius: var(--border-radius-md); border: 0.5px solid rgba(201,150,58,.3); padding: 8px 10px; font-size: 10px; color: #633806; line-height: 1.5; margin-bottom: 10px; }
+.diary-notice strong { color: #854F0B; }
+.diary-emojis { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.diary-emoji { font-size: 20px; cursor: pointer; padding: 4px; border-radius: var(--border-radius-md); border: 1.5px solid transparent; transition: all .15s; line-height: 1; }
+.diary-emoji.sel { border-color: #3D6B52; background: #E8F5EE; }
+.diary-textarea { width: 100%; padding: 8px 10px; border-radius: var(--border-radius-md); border: 1.5px solid var(--color-border-tertiary); font-family: var(--font-sans); font-size: 12px; color: var(--color-text-primary); resize: none; height: 70px; outline: none; background: var(--color-background-secondary); transition: border-color .15s; line-height: 1.5; }
+.diary-textarea:focus { border-color: #3D6B52; background: var(--color-background-primary); }
+.diary-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+.diary-chars { font-size: 10px; color: var(--color-text-secondary); }
+.diary-chars.warn { color: #C9963A; }
+.diary-save-btn { padding: 6px 14px; background: #0A2E20; color: #fff; border: none; border-radius: var(--border-radius-md); font-size: 11px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); }
+.diary-save-btn:disabled { opacity: .5; cursor: not-allowed; }
+.diary-saved { background: #E8F5EE; border-radius: var(--border-radius-md); padding: 10px 12px; font-size: 11px; color: #3D6B52; line-height: 1.6; }
+.diary-saved strong { color: #0A2E20; }
+.diary-not-comms { font-size: 10px; color: var(--color-text-secondary); margin-top: 8px; line-height: 1.5; border-top: 0.5px solid var(--color-border-tertiary); padding-top: 8px; }
+/* ─── ADMIN ─── */
+.admin { flex: 1; background: var(--color-background-secondary); border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); overflow: hidden; display: flex; flex-direction: column; height: 700px; min-width: 0; box-shadow: 0 4px 24px rgba(0,0,0,.15); }
+.admin-topbar { background: var(--color-background-primary); border-bottom: 0.5px solid var(--color-border-tertiary); padding: 0 16px; height: 50px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.admin-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+.admin-body { flex: 1; display: flex; overflow: hidden; min-height: 0; }
+.admin-sb { width: 150px; background: #0A2E20; flex-shrink: 0; display: flex; flex-direction: column; padding: 8px 0; overflow-y: auto; }
+.admin-logout { margin: auto 8px 0; padding: 8px 10px; border: 0.5px solid rgba(255,255,255,.10); border-radius: var(--border-radius-md); background: rgba(255,255,255,.04); color: rgba(255,255,255,.62); font-family: var(--font-sans); font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .15s; }
+.admin-logout:hover { background: rgba(184,222,202,.10); border-color: rgba(184,222,202,.24); color: #fff; }
+.asi { display: flex; align-items: center; gap: 8px; padding: 9px 14px; cursor: pointer; border-left: 2px solid transparent; transition: background .12s; }
+.asi:hover { background: rgba(255,255,255,.05); }
+.asi.on { background: rgba(184,222,202,.1); border-left-color: #B8DECA; }
+.asi-ic { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+.asi-lb { font-size: 12px; color: rgba(255,255,255,.5); }
+.asi.on .asi-lb { color: #fff; font-weight: 500; }
+.asi-ct { background: #B85C38; color: #fff; font-size: 9px; padding: 1px 5px; border-radius: 8px; font-weight: 500; }
+.admin-content { flex: 1; overflow-y: auto; padding: 14px; min-width: 0; }
+.admin-content::-webkit-scrollbar { width: 4px; }
+.admin-content::-webkit-scrollbar-thumb { background: var(--color-border-tertiary); }
+.acard { background: var(--color-background-primary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); padding: 14px; margin-bottom: 10px; }
+.asec { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 10px; }
+.fb-item { background: var(--color-background-primary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); padding: 11px 13px; cursor: pointer; margin-bottom: 7px; border-left: 3px solid transparent; transition: all .15s; }
+.fb-item:hover { transform: translateX(2px); }
+.fb-item.unread { border-left-color: #3D6B52; }
+.fb-top { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.fb-av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; }
+.fb-name { font-size: 12px; font-weight: 500; color: var(--color-text-primary); }
+.fb-time { font-size: 10px; color: var(--color-text-secondary); margin-left: auto; }
+.fb-mood { font-size: 16px; }
+.fb-text { font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: 40px; }
+.fb-detail { background: var(--color-background-primary); border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); padding: 14px; }
+.fb-detail-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.fb-detail-body { font-size: 13px; color: var(--color-text-primary); line-height: 1.7; margin-bottom: 10px; }
+.fb-notice-box { background: #E8F5EE; border-radius: var(--border-radius-md); padding: 8px 10px; font-size: 11px; color: #3D6B52; margin-bottom: 10px; border: 0.5px solid rgba(61,107,82,.2); }
+.fb-resp-area { width: 100%; padding: 8px 10px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-tertiary); font-family: var(--font-sans); font-size: 12px; resize: none; height: 60px; outline: none; background: var(--color-background-secondary); color: var(--color-text-primary); }
+.fb-resp-area:focus { border-color: #3D6B52; }
+.rel-filter { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+.rel-search { flex: 1; padding: 7px 10px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); font-family: var(--font-sans); font-size: 12px; background: var(--color-background-primary); color: var(--color-text-primary); outline: none; }
+.rel-search:focus { border-color: #3D6B52; }
+.pat-opt { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--border-radius-md); cursor: pointer; border: 0.5px solid var(--color-border-tertiary); margin-bottom: 6px; background: var(--color-background-primary); transition: all .15s; }
+.pat-opt:hover, .pat-opt.sel { border-color: #3D6B52; background: #E8F5EE; }
+.pat-av-sm { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; flex-shrink: 0; }
+.adh-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.adh-nm { font-size: 12px; color: var(--color-text-primary); width: 80px; flex-shrink: 0; }
+.adh-bar { flex: 1; height: 5px; background: var(--color-border-tertiary); border-radius: 3px; overflow: hidden; }
+.adh-fill { height: 100%; border-radius: 3px; }
+.adh-pct { font-size: 11px; font-weight: 500; color: var(--color-text-primary); width: 30px; text-align: right; }
+.bar-chart { display: flex; align-items: flex-end; gap: 5px; height: 70px; margin-top: 8px; }
+.bc-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.bc-bar { width: 100%; border-radius: 3px 3px 0 0; }
+.bc-lbl { font-size: 9px; color: var(--color-text-secondary); }
+.bc-val { font-size: 8px; font-weight: 500; color: #3B6D11; }
+.stat-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-bottom: 10px; }
+.stat-c { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px; text-align: center; }
+.stat-v { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+.stat-l { font-size: 10px; color: var(--color-text-secondary); margin-top: 2px; }
+.stat-t { font-size: 10px; margin-top: 4px; font-weight: 500; }
+.up { color: #3B6D11; }
+.dn { color: #A32D2D; }
+.btn-xs { padding: 5px 10px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: var(--color-background-primary); font-family: var(--font-sans); font-size: 11px; cursor: pointer; color: var(--color-text-secondary); }
+.btn-primary-sm { padding: 6px 14px; background: #0A2E20; color: #fff; border: none; border-radius: var(--border-radius-md); font-family: var(--font-sans); font-size: 12px; font-weight: 500; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<!-- ════════ PATIENT APP ════════ -->
+<div class="phone">
+  <div class="ph-status">
+    <span class="ph-time" id="pclock">09:41</span>
+    <span class="ph-icons">●●● WiFi 🔋</span>
+  </div>
+  <div class="ph-header">
+    <div class="ph-brand">Nutri<em>App</em></div>
+    <div class="ph-patient"><div class="ph-dot"></div><span class="ph-pname">Maria Silva</span></div>
+  </div>
+  <div class="ph-scroll" id="ph-content"></div>
+  <nav class="ph-nav">
+    <button class="pn on" data-pp="cardapio"><span class="pn-ic">🥗</span><span class="pn-lb">Cardápio</span></button>
+    <button class="pn" data-pp="compras"><span class="pn-ic">🛒</span><span class="pn-lb">Compras</span></button>
+    <button class="pn" data-pp="info"><span class="pn-ic">📋</span><span class="pn-lb">Informativa</span></button>
+    <button class="pn" data-pp="diario"><span class="pn-ic">📖</span><span class="pn-lb">Diário</span></button>
+  </nav>
+</div>
+
+<!-- ════════ ADMIN PANEL ════════ -->
+<div class="admin">
+  <div class="admin-topbar">
+    <div class="admin-title" id="admin-title">Dashboard</div>
+    <div id="admin-actions"></div>
+  </div>
+  <div class="admin-body">
+    <div class="admin-sb">
+      <div style="padding:10px 14px 6px;font-size:9px;font-weight:500;color:rgba(255,255,255,.25);letter-spacing:.8px;text-transform:uppercase;">MENU</div>
+      <div class="asi on" data-ap="dash"><span class="asi-ic">📊</span><span class="asi-lb">Dashboard</span></div>
+      <div class="asi" data-ap="pac"><span class="asi-ic">👥</span><span class="asi-lb">Pacientes</span></div>
+      <div class="asi" data-ap="plano"><span class="asi-ic">🥗</span><span class="asi-lb">Plano</span></div>
+      <div class="asi" data-ap="feedback"><span class="asi-ic">💬</span><span class="asi-lb">Feedback</span><span class="asi-ct" id="abadge">3</span></div>
+      <div class="asi" data-ap="relatorios"><span class="asi-ic">📈</span><span class="asi-lb">Relatórios</span></div>
+      <div class="asi" data-ap="ia"><span class="asi-ic">🧠</span><span class="asi-lb">IA Clínica</span></div>
+      <button type="button" class="admin-logout" onclick="logout()"><span>↩</span><span>Sair</span></button>
+    </div>
+    <div class="admin-content" id="admin-content"></div>
+  </div>
+</div>
+</div>
+
+<script>
+const PATS=[
+  {id:1,n:"Maria Silva",in:"MS",cl:"#3D6B52",bg:"#E8F5EE",age:35,w:72,h:165,bf:28,adh:82,conds:["Depressão","Ansiedade"]},
+  {id:2,n:"João Costa",in:"JC",cl:"#1E4D7B",bg:"#E3EFF8",age:45,w:88,h:178,bf:null,adh:68,conds:["Hipertensão","Sobrepeso"]},
+  {id:3,n:"Ana Ferreira",in:"AF",cl:"#993C1D",bg:"#FAECE7",age:28,w:58,h:162,bf:22,adh:91,conds:["Anemia ferropriva"]},
+];
+const FOODS=[
+  {id:1,n:"Aveia com banana",meal:"Café",cal:220,c:42,p:7,f:4,qty:"1 xíc + 1 un"},
+  {id:2,n:"Ovos mexidos",meal:"Café",cal:180,c:2,p:14,f:13,qty:"2 unidades"},
+  {id:3,n:"Frango grelhado",meal:"Almoço",cal:210,c:0,p:38,f:5,qty:"150g"},
+  {id:4,n:"Arroz integral",meal:"Almoço",cal:170,c:36,p:4,f:1,qty:"4 col. sopa"},
+  {id:5,n:"Salada verde",meal:"Almoço",cal:80,c:5,p:2,f:6,qty:"1 prato"},
+  {id:6,n:"Iogurte grego",meal:"Lanche",cal:130,c:8,p:10,f:6,qty:"1 pote 170g"},
+  {id:7,n:"Salmão assado",meal:"Jantar",cal:280,c:0,p:35,f:14,qty:"150g"},
+  {id:8,n:"Brócolis vapor",meal:"Jantar",cal:55,c:10,p:4,f:0,qty:"1 xícara"},
+];
+const EMOJIS=["😊","😄","😐","😔","😢","😤","😴","💪","🤒","😰"];
+const MOODS={"😊":"Bem-disposta","😄":"Ótima!","😐":"Neutro","😔":"Triste","😢":"Chorosa","😤":"Estressada","😴":"Cansada","💪":"Com energia!","🤒":"Doente","😰":"Ansiosa"};
+const SHOP_CATS={"Cereais":["Aveia — 1 xícara","Arroz integral — 4 col/dia"],"Proteínas":["Frango — 150g/dia","Ovos — 2 unid/dia","Salmão — 150g (3×/sem)"],"Vegetais":["Salada verde — 1 prato/dia","Brócolis — 1 xícara/dia"],"Lácteos":["Iogurte grego — 1 pote/dia"],"Frutas":["Banana — 1 unidade/dia"]};
+const INFO_FOODS=[
+  {n:"Aveia",tag:"Cereal integral",txt:"Rica em betaglucana que reduz colesterol LDL e regula a glicemia. Efeito direto na microbiota intestinal e saciedade prolongada."},
+  {n:"Salmão",tag:"Peixe gordo",txt:"Ômega-3 (EPA/DHA) com ação neuroprotetora e anti-inflamatória. Fundamental para produção de serotonina e saúde cerebral."},
+  {n:"Brócolis",tag:"Crucífera",txt:"Sulforafano e indol-3-carbinol com ação anticarcinogênica. Fonte de vitamina K, folato e potente antioxidante."},
+];
+
+const TODAY=new Date().toISOString().split("T")[0];
+let PS={pp:"cardapio",checked:{},water:0,waterTarget:8,calTarget:1800,diaryText:"",diaryEmoji:"",diarySaved:null};
+let AS={ap:"dash",selFb:null,relPat:null,relSearch:""};
+
+function getTotals(){let cal=0,c=0,p=0,f=0;FOODS.forEach(food=>{if(PS.checked[food.id]){cal+=food.cal;c+=food.c;p+=food.p;f+=food.f;}});return{cal,c,p,f};}
+function unread(){let n=0;PATS.forEach(pt=>{if(pt._fbUnread)n++;});return n+3;}
+function adColor(v){return v>=80?"#639922":v>=60?"#C9963A":"#C0392B";}
+
+function pCardapio(){
+  const t=getTotals();
+  const pct=Math.min(100,Math.round(t.cal/PS.calTarget*100));
+  const circ=2*Math.PI*28;
+  const off=circ-(pct/100)*circ;
+  const meals=["Café","Almoço","Lanche","Jantar"];
+  return`<div class="hero-card"><div class="hero-row"><div><div class="hero-greet">Olá, Maria 🌿</div><div class="hero-cal">${t.cal} <span style="font-size:14px;color:rgba(255,255,255,.5)">/ ${PS.calTarget} kcal</span></div><div class="hero-sub">CONSUMIDO HOJE</div></div><div class="ring-w"><svg width="72" height="72" class="ring-svg"><circle cx="36" cy="36" r="28" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="6"/><circle cx="36" cy="36" r="28" fill="none" stroke="#B8DECA" stroke-width="6" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${off}" style="transition:stroke-dashoffset .5s"/></svg><div class="ring-center"><div class="ring-pct">${pct}%</div><div class="ring-lbl">da meta</div></div></div></div></div>
+<div class="macro-strip">${[["Carbos",t.c+"g","#C9963A",Math.round(t.c/200*100)],["Prot.",t.p+"g","#B85C38",Math.round(t.p/100*100)],["Lip.",t.f+"g","#185FA5",Math.round(t.f/65*100)],["kcal",t.cal,"#3D6B52",pct]].map(([l,v,col,pc])=>`<div class="mc"><div class="mc-v" style="color:${col}">${v}</div><div class="mc-l">${l}</div><div class="mc-bar"><div class="mc-fill" style="width:${Math.min(100,pc)}%;background:${col}"></div></div></div>`).join("")}</div>
+<div class="water-card"><div class="water-top"><span class="water-title">💧 Hidratação</span><span class="water-ct">${PS.water}/${PS.waterTarget} copos</span></div><div class="glasses">${Array.from({length:PS.waterTarget},(_,i)=>`<div class="glass ${i<PS.water?"on":""}" data-g="${i}"><div class="glass-fill" style="height:${i<PS.water?"78%":"0"}"></div></div>`).join("")}</div></div>
+${meals.map(meal=>{const mf=FOODS.filter(f=>f.meal===meal);return`<div class="pcard"><div class="pcard-title">${meal}</div>${mf.map(f=>`<div class="food-row"><div class="fchk ${PS.checked[f.id]?"on":""}" data-fid="${f.id}">${PS.checked[f.id]?"✓":""}</div><div style="flex:1"><div class="fname">${f.n}</div><div class="fqty">${f.qty}</div></div><div class="fkcal">${f.cal} kcal</div></div>`).join("")}</div>`;}).join("")}`;
+}
+
+function pCompras(){
+  return Object.entries(SHOP_CATS).map(([cat,items])=>`<div class="pcard"><div class="pcard-title">${cat}</div>${items.map(item=>`<div class="food-row"><div class="fname">${item}</div></div>`).join("")}</div>`).join("")+`<div class="pcard" style="text-align:center;padding:16px"><div style="font-size:22px;margin-bottom:6px">📄</div><div style="font-size:12px;color:var(--color-text-secondary)">Exportar lista em PDF</div><button onclick="alert('PDF gerado!')" style="margin-top:8px;padding:6px 16px;background:#0A2E20;color:#fff;border:none;border-radius:var(--border-radius-md);font-size:11px;cursor:pointer;font-family:var(--font-sans)">Gerar PDF</button></div>`;
+}
+
+function pInfo(){
+  return INFO_FOODS.map(f=>`<div class="pcard"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">${f.n}</span><span style="font-size:10px;padding:2px 8px;border-radius:10px;background:#E8F5EE;color:#0F6E56;font-weight:500">${f.tag}</span></div><div style="font-size:11px;color:var(--color-text-secondary);line-height:1.6">${f.txt}</div></div>`).join("");
+}
+
+function pDiario(){
+  const saved=PS.diarySaved;
+  const charLen=PS.diaryText.length;
+  const warn=charLen>250;
+  return`<div class="diary-card"><div class="diary-title"><span style="font-size:16px">📖</span><span>Meu Diário — ${new Date().toLocaleDateString("pt-BR",{day:"2-digit",month:"long"})}</span></div><div class="diary-notice"><strong>ℹ️ Este é seu diário pessoal.</strong> O registro de hoje poderá ser visualizado pela sua nutricionista para acompanhamento. Não é um canal de comunicação direta — para enviar mensagens, acesse o chat com a profissional.</div><div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:6px">Como você está se sentindo hoje?</div><div class="diary-emojis">${EMOJIS.map(e=>`<div class="diary-emoji ${PS.diaryEmoji===e?"sel":""}" data-e="${e}" title="${MOODS[e]||""}">${e}</div>`).join("")}</div>${saved?`<div class="diary-saved"><strong>✅ Diário do dia salvo!</strong> ${PS.diaryEmoji} "${PS.diaryEmoji?MOODS[PS.diaryEmoji]:""}"<br><span style="color:var(--color-text-secondary)">${saved.text}</span><div style="margin-top:6px;font-size:10px;color:var(--color-text-secondary)">Salvo às ${saved.time}</div></div><div class="diary-not-comms">🔒 Registro salvo. Você pode fazer apenas um registro por dia. Sua nutricionista poderá visualizar este registro no painel dela.</div>`:`<textarea class="diary-textarea" id="diary-ta" maxlength="300" placeholder="Escreva como você está se sentindo hoje... (máx. 300 caracteres)" oninput="PS.diaryText=this.value;rph()">${PS.diaryText}</textarea><div class="diary-footer"><span class="diary-chars ${warn?"warn":""}">${charLen}/300 caracteres</span><button class="diary-save-btn" onclick="saveDiary()" ${!PS.diaryText.trim()&&!PS.diaryEmoji?"disabled":""}>💾 Salvar diário</button></div><div class="diary-not-comms">💬 Este campo não é uma mensagem para a nutricionista. É apenas um registro pessoal do seu bem-estar diário que ela poderá visualizar para acompanhar sua evolução.</div>`}</div>`;
+}
+
+function saveDiary(){
+  if(!PS.diaryText.trim()&&!PS.diaryEmoji)return;
+  const now=new Date();
+  const time=now.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+  PS.diarySaved={text:PS.diaryText||"(sem texto)",emoji:PS.diaryEmoji,time,date:TODAY};
+  PATS[0]._diary=PS.diarySaved;
+  PATS[0]._fbUnread=true;
+  rph();radmin();
+}
+
+function rph(){
+  const pages={cardapio:pCardapio,compras:pCompras,info:pInfo,diario:pDiario};
+  const c=document.getElementById("ph-content");
+  if(c)c.innerHTML=(pages[PS.pp]||pCardapio)();
+  document.querySelectorAll(".pn").forEach(b=>b.classList.toggle("on",b.dataset.pp===PS.pp));
+  document.querySelectorAll("[data-fid]").forEach(el=>{el.onclick=()=>{const id=parseInt(el.dataset.fid);PS.checked[id]=!PS.checked[id];rph();};});
+  document.querySelectorAll("[data-g]").forEach(g=>{g.onclick=()=>{const i=parseInt(g.dataset.g);PS.water=i<PS.water?i:i+1;rph();};});
+  document.querySelectorAll("[data-e]").forEach(el=>{el.onclick=()=>{PS.diaryEmoji=PS.diaryEmoji===el.dataset.e?"":el.dataset.e;rph();};});
+}
+
+function aDash(){
+  const avg=Math.round(PATS.reduce((a,p)=>a+p.adh,0)/PATS.length);
+  return`<div class="asec">Visão geral</div><div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px"><div class="stat-c"><div class="stat-v">${PATS.length}</div><div class="stat-l">Pacientes</div><div class="stat-t up">↑ ativos</div></div><div class="stat-c"><div class="stat-v">${avg}%</div><div class="stat-l">Adesão média</div><div class="stat-t up">↑ boa</div></div><div class="stat-c"><div class="stat-v">${unread()}</div><div class="stat-l">Feedbacks</div><div class="stat-t dn">pendentes</div></div></div><div class="acard"><div class="asec">Adesão por paciente</div>${PATS.map(p=>`<div class="adh-row"><div class="adh-nm" style="font-size:11px">${p.n.split(" ")[0]}</div><div class="adh-bar"><div class="adh-fill" style="width:${p.adh}%;background:${adColor(p.adh)}"></div></div><div class="adh-pct">${p.adh}%</div></div>`).join("")}</div><div class="acard"><div class="asec">Feedbacks recentes</div>${PATS.filter(p=>p._diary).slice(0,2).map(p=>`<div class="fb-item ${p._fbUnread?"unread":""}" onclick="AS.ap='feedback';AS.selFb=p.id;radmin()"><div class="fb-top"><div class="fb-av" style="background:${p.bg};color:${p.cl}">${p.in}</div><span class="fb-name" style="font-size:12px">${p.n}</span><span class="fb-mood">${p._diary.emoji}</span><span class="fb-time">${p._diary.time}</span></div><div class="fb-text">${p._diary.text}</div></div>`).join("")||`<div style="font-size:12px;color:var(--color-text-secondary);text-align:center;padding:16px">Nenhum feedback hoje ainda.</div>`}</div>`;
+}
+
+function aPac(){
+  return`<div class="asec">Pacientes cadastrados</div>${PATS.map(p=>`<div class="acard" style="cursor:pointer" onclick="AS.ap='plano';radmin()"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="fb-av" style="background:${p.bg};color:${p.cl};width:36px;height:36px">${p.in}</div><div><div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">${p.n}</div><div style="font-size:11px;color:var(--color-text-secondary)">${p.age} anos · ${p.w}kg${p.bf?` · BF ${p.bf}%`:""}</div></div><div style="margin-left:auto;display:flex;gap:4px">${p.conds.map(c=>`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:#E8F5EE;color:#0F6E56;font-weight:500">${c}</span>`).join("")}</div></div><div class="adh-row"><div class="adh-bar"><div class="adh-fill" style="width:${p.adh}%;background:${adColor(p.adh)}"></div></div><span style="font-size:11px;color:var(--color-text-secondary);margin-left:8px">${p.adh}% adesão</span></div></div>`).join("")}<button onclick="alert('Novo paciente')" style="width:100%;padding:10px;border:1.5px dashed var(--color-border-tertiary);border-radius:var(--border-radius-md);background:transparent;font-family:var(--font-sans);font-size:13px;cursor:pointer;color:var(--color-text-secondary)">+ Novo paciente</button>`;
+}
+
+function aPlano(){
+  return`<div class="acard"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="fb-av" style="background:#E8F5EE;color:#3D6B52;width:40px;height:40px">MS</div><div><div style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Maria Silva</div><div style="font-size:11px;color:var(--color-text-secondary)">Meta: 1.800 kcal · P:115g C:175g L:65g</div></div><select style="margin-left:auto;padding:6px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);font-family:var(--font-sans);font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary)">${PATS.map(p=>`<option>${p.n}</option>`).join("")}</select></div></div><div class="acard"><div class="asec">🔍 Busca TACO</div><input class="rel-search" style="width:100%;margin-bottom:8px" placeholder="Pesquisar alimento (ex: frango, aveia)..."><div style="font-size:12px;color:var(--color-text-secondary);text-align:center;padding:16px">Selecione um alimento para adicionar ao plano do paciente.</div></div>`;
+}
+
+function aFeedback(){
+  const mockFb=[
+    {pid:2,pn:"João Costa",in:"JC",cl:"#1E4D7B",bg:"#E3EFF8",emoji:"😟",text:"Tive dificuldade no almoço hoje, saí para reunião e comi fora do plano.",time:"Ontem 18:40",unread:true},
+    {pid:3,pn:"Ana Ferreira",in:"AF",cl:"#993C1D",bg:"#FAECE7",emoji:"💪",text:"Semana ótima! Todos os treinos feitos e adesão 100%.",time:"Ontem 12:00",unread:true},
+    {pid:1,pn:"Maria Silva",in:"MS",cl:"#3D6B52",bg:"#E8F5EE",emoji:"🤔",text:"Posso substituir o salmão? Estava caro essa semana.",time:"2 dias atrás",unread:false},
+  ];
+  const diaryFb=PATS.filter(p=>p._diary).map(p=>({pid:p.id,pn:p.n,in:p.in,cl:p.cl,bg:p.bg,emoji:p._diary.emoji||"📖",text:p._diary.text,time:`Hoje ${p._diary.time}`,unread:p._fbUnread,isDiary:true}));
+  const allFb=[...diaryFb,...mockFb];
+  const sel=AS.selFb!=null?allFb.find(f=>f.pid===AS.selFb):null;
+  return`<div style="display:grid;grid-template-columns:1fr 1.3fr;gap:10px;height:100%"><div><div class="asec">Feedbacks recebidos</div><div style="background:#FDF3E0;border-radius:var(--border-radius-md);padding:8px 10px;font-size:11px;color:#633806;margin-bottom:10px;border:0.5px solid rgba(201,150,58,.25)">📖 Entradas do <strong>diário pessoal</strong> dos pacientes são exibidas aqui para acompanhamento clínico.</div>${allFb.map(f=>`<div class="fb-item ${f.unread?"unread":""}" onclick="AS.selFb=${f.pid};radmin()"><div class="fb-top"><div class="fb-av" style="background:${f.bg};color:${f.cl}">${f.in}</div><span class="fb-name" style="font-size:12px">${f.pn}</span>${f.isDiary?`<span style="font-size:9px;padding:1px 6px;border-radius:8px;background:#E8F5EE;color:#3D6B52;font-weight:500">DIÁRIO</span>`:""}<span class="fb-mood">${f.emoji}</span><span class="fb-time">${f.time}</span></div><div class="fb-text">${f.text}</div></div>`).join("")}</div><div>${sel?`<div class="asec">Feedback — ${sel.pn}</div><div class="fb-detail"><div class="fb-detail-head"><div class="fb-av" style="background:${sel.bg};color:${sel.cl};width:38px;height:38px">${sel.in}</div><div><div style="font-size:13px;font-weight:500">${sel.pn} ${sel.emoji}</div><div style="font-size:11px;color:var(--color-text-secondary)">${sel.time}</div></div></div>${sel.isDiary?`<div class="fb-notice-box">📖 <strong>Entrada do Diário Pessoal</strong> — este registro foi feito pelo paciente no diário. Não é uma mensagem direta.</div>`:""}<div class="fb-detail-body">${sel.text}</div><div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px">Responder ao paciente:</div><textarea class="fb-resp-area" placeholder="Escreva sua resposta ou anotação clínica..."></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn-primary-sm" onclick="alert('Resposta enviada!')">📤 Responder</button><button class="btn-xs" onclick="AS.ap='plano';radmin()">🥗 Ver plano</button></div></div>`:`<div style="text-align:center;padding:40px 16px;color:var(--color-text-secondary)"><div style="font-size:28px;margin-bottom:8px">💬</div><div style="font-size:13px">Selecione um feedback para visualizar</div></div>`}</div></div>`;
+}
+
+function aRelatorios(){
+  const selPat=AS.relPat!=null?PATS.find(p=>p.id===AS.relPat):null;
+  const filtered=AS.relSearch?PATS.filter(p=>p.n.toLowerCase().includes(AS.relSearch.toLowerCase())):PATS;
+  const wv=[68,72,76,80,78,84,80];
+  return`<div class="acard"><div class="asec">Filtrar por paciente</div><div class="rel-filter"><input class="rel-search" id="rel-search" placeholder="Pesquisar paciente..." value="${AS.relSearch}" oninput="AS.relSearch=this.value;radmin()">${AS.relPat!=null?`<button class="btn-xs" onclick="AS.relPat=null;AS.relSearch='';radmin()">✕ Limpar</button>`:""}</div><div>${filtered.map(p=>`<div class="pat-opt ${AS.relPat===p.id?"sel":""}" onclick="AS.relPat=${p.id};AS.relSearch='';radmin()"><div class="pat-av-sm" style="background:${p.bg};color:${p.cl}">${p.in}</div><div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--color-text-primary)">${p.n}</div><div style="font-size:10px;color:var(--color-text-secondary)">${p.conds.join(", ")}</div></div><span style="font-size:11px;font-weight:500;color:${adColor(p.adh)}">${p.adh}%</span></div>`).join("")}</div></div>${selPat?`<div class="acard"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="fb-av" style="background:${selPat.bg};color:${selPat.cl};width:40px;height:40px">${selPat.in}</div><div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">${selPat.n}</div><div style="font-size:11px;color:var(--color-text-secondary)">${selPat.age} anos · ${selPat.w}kg · ${selPat.h}cm · ${selPat.conds.join(", ")}</div></div></div><div class="stat-grid"><div class="stat-c"><div class="stat-v">${selPat.adh}%</div><div class="stat-l">Adesão semanal</div><div class="stat-t ${selPat.adh>=75?"up":"dn"}">${selPat.adh>=75?"↑ Ótima":"↓ Atenção"}</div></div><div class="stat-c"><div class="stat-v">${selPat.w}kg</div><div class="stat-l">Peso atual</div><div class="stat-t up">↑ registrado</div></div></div><div style="font-size:11px;font-weight:500;color:var(--color-text-secondary);margin-bottom:4px">Adesão calórica — 7 dias</div><div class="bar-chart">${wv.map((v,i)=>{const d=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];const h=Math.round(v/100*60);return`<div class="bc-col"><div class="bc-val">${v}%</div><div class="bc-bar" style="height:${h}px;background:${adColor(v)}"></div><div class="bc-lbl">${d[i]}</div></div>`;}).join("")}</div>${selPat._diary?`<div style="margin-top:10px;background:#E8F5EE;border-radius:var(--border-radius-md);padding:10px;font-size:12px;color:#3D6B52"><strong>📖 Último diário:</strong> ${selPat._diary.emoji} "${selPat._diary.text}" — ${selPat._diary.time}</div>`:""}</div>`:
+  `<div style="text-align:center;padding:30px 16px;color:var(--color-text-secondary)"><div style="font-size:28px;margin-bottom:8px">👤</div><div style="font-size:13px">Selecione um paciente acima para ver seus relatórios individuais</div></div>`}`;
+}
+
+function aIA(){
+  return`<div class="acard" style="text-align:center;padding:24px"><div style="font-size:28px;margin-bottom:8px">🧠</div><div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">IA Consultora Nutricional</div><div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px">Consulte alimentos para patologias com mecanismos de ação baseados em evidências.</div><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">${["Depressão","Ansiedade","Hipertensão","Diabetes t.2","Anemia","Hipotireoidismo","Dislipidemia","Osteoporose"].map(p=>`<span onclick="alert('Consultando IA sobre: ${p}')" style="padding:5px 10px;border-radius:10px;font-size:11px;cursor:pointer;border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary);background:var(--color-background-secondary)">${p}</span>`).join("")}</div><input style="width:100%;margin-top:12px;padding:8px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);font-family:var(--font-sans);font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary)" placeholder="Pergunte sobre nutrição clínica funcional..."></div>`;
+}
+
+function radmin(){
+  const pages={dash:aDash,pac:aPac,plano:aPlano,feedback:aFeedback,relatorios:aRelatorios,ia:aIA};
+  const c=document.getElementById("admin-content");
+  if(c)c.innerHTML=(pages[AS.ap]||aDash)();
+  document.querySelectorAll(".asi").forEach(b=>b.classList.toggle("on",b.dataset.ap===AS.ap));
+  const titles={dash:"Dashboard",pac:"Pacientes",plano:"Plano Alimentar",feedback:"Feedback dos Pacientes",relatorios:"Relatórios",ia:"IA Consultora"};
+  const t=document.getElementById("admin-title");
+  if(t)t.textContent=titles[AS.ap]||"";
+  const b=document.getElementById("abadge");
+  if(b){const n=unread();b.textContent=n;b.style.display=n?"inline":"none";}
+}
+
+document.querySelectorAll(".pn").forEach(b=>{b.onclick=()=>{PS.pp=b.dataset.pp;rph();};});
+document.querySelectorAll(".asi").forEach(b=>{b.onclick=()=>{AS.ap=b.dataset.ap;radmin();};});
+function logout(){window.location.href="/";}
+
+function tick(){const el=document.getElementById("pclock");if(el){const n=new Date();el.textContent=n.getHours().toString().padStart(2,"0")+":"+n.getMinutes().toString().padStart(2,"0");}}
+tick();setInterval(tick,10000);
+rph();
+radmin();
+</script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriApp — Demonstração Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;}
+body{font-family:'DM Sans',sans-serif;background:#0A1F13;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 20px 60px;}
+.page-header{text-align:center;margin-bottom:40px;}
+.page-logo{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:500;color:#fff;letter-spacing:-.5px;}
+.page-logo em{color:#9FCFB4;font-style:normal;}
+.page-sub{font-size:14px;color:rgba(255,255,255,.4);margin-top:8px;letter-spacing:.3px;}
+.phones{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;align-items:flex-start;}
+.phone-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.phone-label{font-family:'Cormorant Garamond',serif;font-size:20px;color:#fff;font-weight:500;}
+.phone-sub{font-size:12px;color:rgba(255,255,255,.35);text-align:center;max-width:240px;line-height:1.6;}
+/* Phone frame */
+.phone{width:320px;height:660px;background:#111;border-radius:44px;position:relative;box-shadow:0 0 0 10px #1A1A1A,0 0 0 12px #2A2A2A,0 40px 80px rgba(0,0,0,.6);overflow:hidden;flex-shrink:0;}
+.phone::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:80px;height:5px;background:#1A1A1A;border-radius:10px;z-index:50;}
+.phone::after{content:'';position:absolute;bottom:12px;left:50%;transform:translateX(-50%);width:100px;height:4px;background:rgba(255,255,255,.15);border-radius:10px;z-index:50;}
+.phone-screen{position:absolute;inset:0;border-radius:44px;overflow:hidden;background:#F5F1EA;}
+/* ── STATUS BAR ── */
+.sb-bar{background:#0A2316;padding:9px 18px 5px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.sb-time{font-size:13px;font-weight:600;color:#fff;}
+.sb-icons{font-size:11px;color:rgba(255,255,255,.6);}
+/* ── COMMON HEADER ── */
+.ph-top{background:#0A2316;padding:5px 16px 14px;display:flex;justify-content:space-between;align-items:center;}
+.ph-brand{font-family:'Cormorant Garamond',serif;font-size:20px;color:#fff;font-weight:500;}
+.ph-brand em{color:#9FCFB4;font-style:normal;}
+/* ── PATIENT APP ── */
+.pat-screen{display:flex;flex-direction:column;height:100%;}
+.pat-content{flex:1;overflow-y:auto;padding:12px;background:#F5F1EA;}
+.pat-content::-webkit-scrollbar{display:none;}
+.pat-nav{background:#fff;border-top:0.5px solid rgba(0,0,0,.1);display:flex;flex-shrink:0;}
+.pn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px 10px;border:none;background:none;cursor:pointer;border-top:2px solid transparent;font-family:'DM Sans',sans-serif;}
+.pn.on{border-top-color:#0A2316;}
+.pn-ic{font-size:16px;}
+.pn-lb{font-size:8px;color:#9CA3AF;}
+.pn.on .pn-lb{color:#0A2316;font-weight:600;}
+/* Cards */
+.hero{background:#0A2316;border-radius:14px;padding:14px;margin-bottom:9px;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:rgba(159,207,180,.06);}
+.hrow{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+.hgreet{font-size:10px;color:#9FCFB4;margin-bottom:2px;}
+.hcal{font-size:26px;font-weight:600;color:#fff;line-height:1;}
+.hcal span{font-size:13px;color:rgba(255,255,255,.3);font-weight:300;}
+.hsub{font-size:9px;color:rgba(255,255,255,.3);margin-top:2px;letter-spacing:.4px;}
+.ring{width:68px;height:68px;position:relative;}
+.mstrip{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;}
+.mc{background:#fff;border-radius:8px;border:0.5px solid rgba(0,0,0,.08);padding:7px 5px;text-align:center;}
+.mc-v{font-size:13px;font-weight:600;}
+.mc-l{font-size:8px;color:#9CA3AF;margin-top:1px;}
+.mc-bar{height:2px;background:rgba(0,0,0,.08);border-radius:2px;margin-top:4px;overflow:hidden;}
+.mc-fill{height:100%;border-radius:2px;}
+.pcard{background:#fff;border-radius:10px;border:0.5px solid rgba(0,0,0,.08);padding:11px;margin-bottom:7px;}
+.pct{font-size:10px;font-weight:600;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.frow{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:0.5px solid rgba(0,0,0,.06);}
+.frow:last-child{border-bottom:none;}
+.fck{width:18px;height:18px;border-radius:4px;border:1.5px solid #9FCFB4;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.fck.on{background:#0A2316;border-color:#0A2316;color:#fff;}
+.fnm{font-size:11px;color:#111;flex:1;}
+.fqt{font-size:9px;color:#9CA3AF;}
+.fkc{font-size:10px;font-weight:600;color:#2D5A3D;}
+.wcard{background:#EEF5FB;border-radius:10px;padding:10px;margin-bottom:8px;border:0.5px solid #C8DFF2;}
+.wtop{display:flex;justify-content:space-between;margin-bottom:8px;}
+.wt{font-size:11px;font-weight:600;color:#1A5C9A;}
+.wc{font-size:10px;color:#1A5C9A;opacity:.6;}
+.glasses{display:flex;flex-wrap:wrap;gap:5px;}
+.gl{width:26px;height:32px;border-radius:3px 3px 5px 5px;border:1.5px solid #B8D4EE;background:#fff;display:flex;align-items:flex-end;overflow:hidden;cursor:pointer;}
+.gl.on{border-color:#1A5C9A;}
+.gl-fill{width:100%;background:#3B8ED4;transition:height .2s;}
+/* Diary */
+.dcard{background:#fff;border-radius:10px;border:0.5px solid rgba(0,0,0,.08);padding:12px;margin-bottom:7px;}
+.dnotice{background:#FBF3E0;border-radius:7px;border:0.5px solid rgba(196,154,60,.2);padding:8px 10px;font-size:10px;color:#633806;margin-bottom:10px;line-height:1.5;}
+.emojis{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.demoji{font-size:19px;cursor:pointer;padding:4px;border-radius:6px;border:1.5px solid transparent;}
+.demoji.sel{border-color:#2D5A3D;background:#E4F3EA;}
+.dta{width:100%;padding:8px 10px;border-radius:8px;border:1.5px solid rgba(0,0,0,.1);font-size:11px;color:#111;resize:none;height:64px;outline:none;background:#F5F1EA;line-height:1.5;font-family:'DM Sans',sans-serif;}
+.dta:focus{border-color:#2D5A3D;background:#fff;}
+.dfoot{display:flex;justify-content:space-between;align-items:center;margin-top:5px;}
+.dchars{font-size:9px;color:#9CA3AF;}
+.dsave{padding:5px 12px;background:#0A2316;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.dsaved{background:#E4F3EA;border-radius:8px;padding:10px;font-size:11px;color:#2D5A3D;line-height:1.6;}
+/* ── ADMIN APP ── */
+.admin-screen{display:flex;flex-direction:column;height:100%;}
+.adm-content{flex:1;overflow-y:auto;padding:12px;background:#F5F1EA;}
+.adm-content::-webkit-scrollbar{display:none;}
+.adm-nav{background:#fff;border-top:0.5px solid rgba(0,0,0,.1);display:flex;flex-shrink:0;}
+.an{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px 10px;border:none;background:none;cursor:pointer;border-top:2px solid transparent;font-family:'DM Sans',sans-serif;}
+.an.on{border-top-color:#0A2316;}
+.an-ic{font-size:16px;}
+.an-lb{font-size:7px;color:#9CA3AF;}
+.an.on .an-lb{color:#0A2316;font-weight:600;}
+.acard{background:#fff;border-radius:10px;border:0.5px solid rgba(0,0,0,.08);padding:11px;margin-bottom:7px;}
+.asec{font-family:'Cormorant Garamond',serif;font-size:14px;color:#111;margin-bottom:8px;font-weight:500;}
+.sstat{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:7px;}
+.ssc{background:#fff;border-radius:8px;border:0.5px solid rgba(0,0,0,.08);padding:10px;}
+.ssic{font-size:17px;margin-bottom:5px;}
+.ssv{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:#111;}
+.ssl{font-size:10px;color:#9CA3AF;}
+.sst{font-size:9px;margin-top:3px;font-weight:600;}
+.arow{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+.aname{font-size:11px;color:#111;width:70px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.abar{flex:1;height:4px;background:rgba(0,0,0,.08);border-radius:2px;overflow:hidden;}
+.afill{height:100%;border-radius:2px;}
+.apct{font-size:9px;font-weight:600;color:#111;width:26px;text-align:right;}
+.iifym-b{background:#0A2316;border-radius:10px;padding:12px;}
+.ii-t{font-size:9px;color:#9FCFB4;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;font-weight:600;}
+.ii-g{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+.ii-v{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:500;color:#fff;text-align:center;}
+.ii-l{font-size:9px;color:rgba(255,255,255,.35);text-align:center;margin-top:1px;}
+.fb-item{background:#fff;border-radius:8px;border:0.5px solid rgba(0,0,0,.08);padding:10px;margin-bottom:6px;border-left:3px solid transparent;}
+.fb-item.ur{border-left-color:#2D5A3D;}
+.fb-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;}
+.fb-nm{font-size:11px;font-weight:600;color:#111;}
+.fb-tm{font-size:9px;color:#9CA3AF;}
+.fb-pv{font-size:10px;color:#9CA3AF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sw-btn{display:inline-block;margin-bottom:12px;background:rgba(255,255,255,.12);border:0.5px solid rgba(255,255,255,.15);border-radius:8px;padding:5px 12px;font-size:11px;color:rgba(255,255,255,.7);cursor:pointer;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-logo">Nutri<em>App</em></div>
+  <div class="page-sub">Demonstração Mobile — MVP · iOS / Android</div>
+</div>
+
+<div class="phones">
+
+  <!-- ══════════════════ PATIENT APP ══════════════════ -->
+  <div class="phone-wrap">
+    <div class="phone-label">App do Paciente</div>
+    <div class="phone-sub">Acesso exclusivo ao perfil individual. Login fixo por dispositivo.</div>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="pat-screen">
+          <div class="sb-bar"><span class="sb-time" id="clock1">09:41</span><span class="sb-icons">●●● WiFi 🔋</span></div>
+          <div class="ph-top"><div class="ph-brand">Nutri<em>App</em></div><div style="background:rgba(255,255,255,.12);border:0.5px solid rgba(255,255,255,.18);border-radius:20px;padding:4px 10px;display:flex;align-items:center;gap:5px"><div style="width:6px;height:6px;border-radius:50%;background:#9FCFB4"></div><span style="font-size:11px;color:#fff">Maria Silva</span></div></div>
+          <div class="pat-content" id="p-content"></div>
+          <nav class="pat-nav">
+            <button class="pn on" data-pp="cardapio"><span class="pn-ic">🥗</span><span class="pn-lb">Cardápio</span></button>
+            <button class="pn" data-pp="compras"><span class="pn-ic">🛒</span><span class="pn-lb">Compras</span></button>
+            <button class="pn" data-pp="info"><span class="pn-ic">📋</span><span class="pn-lb">Informativa</span></button>
+            <button class="pn" data-pp="diario"><span class="pn-ic">📖</span><span class="pn-lb">Diário</span></button>
+            <button class="pn" data-pp="exercicios"><span class="pn-ic">💪</span><span class="pn-lb">Exercícios</span></button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ ADMIN APP ══════════════════ -->
+  <div class="phone-wrap">
+    <div class="phone-label">App do Nutricionista</div>
+    <div class="phone-sub">Painel completo de gestão. Acesso exclusivo de profissional.</div>
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="admin-screen">
+          <div class="sb-bar"><span class="sb-time" id="clock2">09:41</span><span class="sb-icons">●●● WiFi 🔋</span></div>
+          <div class="ph-top"><div class="ph-brand">Nutri<em>App</em></div><div style="background:rgba(255,255,255,.12);border:0.5px solid rgba(255,255,255,.18);border-radius:20px;padding:4px 10px;display:flex;align-items:center;gap:5px"><div style="width:6px;height:6px;border-radius:50%;background:#9FCFB4"></div><span style="font-size:11px;color:#fff">Dra. Natalia</span></div></div>
+          <div class="adm-content" id="a-content"></div>
+          <nav class="adm-nav">
+            <button class="an on" data-ap="dash"><span class="an-ic">📊</span><span class="an-lb">Dashboard</span></button>
+            <button class="an" data-ap="pac"><span class="an-ic">👥</span><span class="an-lb">Pacientes</span></button>
+            <button class="an" data-ap="plano"><span class="an-ic">🥗</span><span class="an-lb">Plano</span></button>
+            <button class="an" data-ap="feedback"><span class="an-ic">💬</span><span class="an-lb">Feedback</span></button>
+            <button class="an" data-ap="ia"><span class="an-ic">🧠</span><span class="an-lb">IA</span></button>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const PATS=[
+  {id:1,n:"Maria Silva",in:"MS",cl:"#2D5A3D",bg:"#E4F3EA",adh:82,conds:["Depressão","Ansiedade"]},
+  {id:2,n:"João Costa",in:"JC",cl:"#1A4F82",bg:"#E3EEF7",adh:68,conds:["Hipertensão"]},
+  {id:3,n:"Ana Ferreira",in:"AF",cl:"#8B3510",bg:"#F5EBE4",adh:91,conds:["Anemia"]},
+];
+const FOODS=[
+  {id:1,n:"Aveia com banana",meal:"Café",cal:220,qty:"1 xíc"},
+  {id:2,n:"Ovos mexidos",meal:"Café",cal:180,qty:"2 un"},
+  {id:3,n:"Frango grelhado",meal:"Almoço",cal:210,qty:"150g"},
+  {id:4,n:"Arroz integral",meal:"Almoço",cal:170,qty:"4 col"},
+  {id:5,n:"Salada verde",meal:"Almoço",cal:80,qty:"1 prato"},
+  {id:6,n:"Iogurte grego",meal:"Lanche",cal:130,qty:"170g"},
+  {id:7,n:"Salmão assado",meal:"Jantar",cal:280,qty:"150g"},
+  {id:8,n:"Brócolis vapor",meal:"Jantar",cal:55,qty:"1 xíc"},
+];
+const MSGS=[
+  {pid:1,in:"MS",cl:"#2D5A3D",bg:"#E4F3EA",nm:"Maria Silva",mood:"😊",pv:"Consegui todas as refeições hoje!",tm:"Hoje 09:14",ur:true},
+  {pid:2,in:"JC",cl:"#1A4F82",bg:"#E3EEF7",nm:"João Costa",mood:"😟",pv:"Dificuldade no almoço hoje...",tm:"Ontem 18:40",ur:true},
+  {pid:3,in:"AF",cl:"#8B3510",bg:"#F5EBE4",nm:"Ana Ferreira",mood:"💪",pv:"Semana ótima! Adesão 100%",tm:"Ontem 12:00",ur:false},
+];
+const EMOJIS=["😊","😄","😐","😔","😢","😤","😴","💪","🤒","😰"];
+
+let PS={pp:'cardapio',checked:{},water:3,diaryText:'',diaryEmoji:'',diarySaved:null};
+let AS={ap:'dash'};
+
+function adColor(v){return v>=80?'#2D8050':v>=60?'#C49A3C':'#B83232';}
+function getTotals(){let c=0,carbs=0,pr=0,f=0;FOODS.forEach(fd=>{if(PS.checked[fd.id]){c+=fd.cal;carbs+=12;pr+=8;f+=4;}});return{c,carbs,pr,f};}
+
+function renderPatient(){
+  const t=getTotals();const pct=Math.min(100,Math.round(t.c/1800*100));
+  const circ=2*Math.PI*26;const off=circ-(pct/100)*circ;
+  const pages={
+    cardapio:`
+<div class="hero"><div class="hrow">
+<div><div class="hgreet">Olá, Maria 🌿</div><div class="hcal">${t.c} <span>/ 1800 kcal</span></div><div class="hsub">CONSUMIDO HOJE</div></div>
+<div class="ring"><svg width="68" height="68" style="transform:rotate(-90deg)">
+<circle cx="34" cy="34" r="26" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="5"/>
+<circle cx="34" cy="34" r="26" fill="none" stroke="#9FCFB4" stroke-width="5" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${off}"/>
+</svg>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+<div style="font-size:13px;font-weight:600;color:#fff">${pct}%</div>
+<div style="font-size:8px;color:#9FCFB4">da meta</div>
+</div></div></div></div>
+<div class="mstrip">
+${[['Carbos',t.carbs+'g','#C49A3C',60],['Prot.',t.pr+'g','#B55E3A',45],['Lip.',t.f+'g','#1A5C9A',35],['kcal',t.c,'#2D5A3D',pct]].map(([l,v,col,pct])=>`<div class="mc"><div class="mc-v" style="color:${col}">${v}</div><div class="mc-l">${l}</div><div class="mc-bar"><div class="mc-fill" style="width:${Math.min(100,pct)}%;background:${col}"></div></div></div>`).join('')}
+</div>
+<div class="wcard"><div class="wtop"><span class="wt">💧 Hidratação</span><span class="wc">${PS.water}/8 copos</span></div>
+<div class="glasses">${Array.from({length:8},(_,i)=>`<div class="gl ${i<PS.water?'on':''}" onclick="PS.water=i<PS.water?i:i+1;renderPatient()"><div class="gl-fill" style="height:${i<PS.water?'76%':'0'}"></div></div>`).join('')}</div>
+</div>
+${['Café','Almoço','Lanche','Jantar'].map(meal=>{const mf=FOODS.filter(f=>f.meal===meal);return`<div class="pcard"><div class="pct">${meal}</div>
+${mf.map(f=>`<div class="frow"><div class="fck ${PS.checked[f.id]?'on':''}" onclick="PS.checked[${f.id}]=!PS.checked[${f.id}];renderPatient()">${PS.checked[f.id]?'✓':''}</div><div style="flex:1"><div class="fnm">${f.n}</div><div class="fqt">${f.qty}</div></div><div class="fkc">${f.cal}kcal</div></div>`).join('')}
+</div>`;}).join('')}`,
+
+    compras:`<div class="pcard"><div class="asec">🛒 Lista da semana</div>
+${[['Proteínas',['Frango 1kg','Ovos 12un','Salmão 300g']],['Vegetais',['Brócolis 1un','Salada verde 1pc']],['Cereais & Frutas',['Aveia 500g','Banana 6un','Arroz int. 1kg']]].map(([cat,its])=>`<div style="margin-bottom:10px"><div style="font-size:9px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">${cat}</div>${its.map(i=>`<div class="frow"><div class="fnm">${i}</div></div>`).join('')}</div>`).join('')}
+<button style="width:100%;padding:8px;background:#0A2316;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;margin-top:8px" onclick="alert('PDF gerado!')">📄 Exportar PDF</button>
+</div>`,
+
+    info:`<div class="pcard"><div class="asec">🥗 Benefícios</div>
+${[['Aveia','Betaglucana reduz colesterol e regula glicemia'],['Salmão','Ômega-3 neuroprotetor e anti-inflamatório'],['Brócolis','Sulforafano anticarcinogênico e antioxidante'],['Banana','Triptofano precursor da serotonina e humor']].map(([n,txt])=>`<div style="padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,.06)"><div style="font-size:12px;font-weight:600;color:#111;margin-bottom:2px">${n}</div><div style="font-size:10px;color:#9CA3AF;line-height:1.5">${txt}</div></div>`).join('')}
+</div>`,
+
+    diario:`<div class="dcard"><div style="font-size:12px;font-weight:600;color:#111;margin-bottom:7px;display:flex;align-items:center;gap:5px"><span>📖</span>Diário — ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long'})}</div>
+<div class="dnotice"><strong>ℹ️</strong> Registro pessoal. Pode ser visto pela sua nutricionista para acompanhamento. Não é comunicação direta.</div>
+<div style="font-size:10px;font-weight:600;color:#9CA3AF;margin-bottom:7px">Como você está?</div>
+<div class="emojis">${EMOJIS.map(e=>`<div class="demoji ${PS.diaryEmoji===e?'sel':''}" onclick="PS.diaryEmoji=PS.diaryEmoji==='${e}'?'':'${e}';renderPatient()">${e}</div>`).join('')}</div>
+${PS.diarySaved?`<div class="dsaved"><strong>✅ Diário salvo!</strong> ${PS.diarySaved.emoji}<br><span style="color:#9CA3AF">${PS.diarySaved.text}</span></div>
+<div style="font-size:9px;color:#9CA3AF;margin-top:6px;line-height:1.5">🔒 Um registro por dia. Sua nutricionista pode visualizá-lo.</div>`
+:`<textarea class="dta" id="dta" maxlength="300" placeholder="Como você se sente hoje? (máx. 300)" oninput="PS.diaryText=this.value;document.getElementById('dchars').textContent=this.value.length+'/300'">${PS.diaryText}</textarea>
+<div class="dfoot"><span class="dchars" id="dchars">${PS.diaryText.length}/300</span><button class="dsave" onclick="PS.diarySaved={text:PS.diaryText||'(sem texto)',emoji:PS.diaryEmoji,time:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})};renderPatient()">💾 Salvar</button></div>
+<div style="font-size:9px;color:#9CA3AF;margin-top:6px;border-top:0.5px solid rgba(0,0,0,.06);padding-top:6px;line-height:1.5">💬 Este campo não é mensagem para a nutricionista.</div>`}
+</div>`,
+
+    exercicios:`<div class="pcard"><div class="asec">💪 Exercícios</div>
+${[['🏠 Casa','Flexão 3×12 · Agachamento 4×15 · Prancha 3×30s'],['🌿 Ao ar livre','Caminhada 30min · Corrida suave 20min'],['🏋️ Academia','Supino 4×12 · Remada 3×12 · HIIT 20min']].map(([t,it])=>`<div style="padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,.06)"><div style="font-size:11px;font-weight:600;color:#111;margin-bottom:3px">${t}</div><div style="font-size:10px;color:#9CA3AF;line-height:1.5">${it}</div></div>`).join('')}
+</div>`,
+  };
+  document.getElementById('p-content').innerHTML=pages[PS.pp]||pages.cardapio;
+  document.querySelectorAll('.pn').forEach(b=>b.classList.toggle('on',b.dataset.pp===PS.pp));
+}
+
+function renderAdmin(){
+  const avg=Math.round(PATS.reduce((a,p)=>a+p.adh,0)/PATS.length);
+  const pages={
+    dash:`<div class="sstat">
+<div class="ssc"><div class="ssic">👥</div><div class="ssv">3</div><div class="ssl">Pacientes</div><div class="sst" style="color:#2D8050">↑ ativos</div></div>
+<div class="ssc"><div class="ssic">📊</div><div class="ssv">${avg}%</div><div class="ssl">Adesão média</div><div class="sst" style="color:#2D8050">↑ boa</div></div>
+<div class="ssc"><div class="ssic">💬</div><div class="ssv">3</div><div class="ssl">Feedbacks</div><div class="sst" style="color:#B83232">↑ novos</div></div>
+<div class="ssc"><div class="ssic">📋</div><div class="ssv">2</div><div class="ssl">Planos ativos</div><div class="sst" style="color:#2D8050">↑ ok</div></div>
+</div>
+<div class="acard"><div class="asec">Adesão dos pacientes</div>
+${PATS.map(p=>`<div class="arow"><div class="aname">${p.n.split(' ')[0]}</div><div class="abar"><div class="afill" style="width:${p.adh}%;background:${adColor(p.adh)}"></div></div><div class="apct">${p.adh}%</div></div>`).join('')}
+</div>
+<div style="font-size:12px;font-weight:500;color:#111;margin-bottom:6px">IIFYM — Maria Silva</div>
+<div class="iifym-b"><div class="ii-t">Meta calculada · Katch-McArdle</div>
+<div class="ii-g">
+<div><div class="ii-v">1800</div><div class="ii-l">kcal</div></div>
+<div><div class="ii-v">175g</div><div class="ii-l">Carbos</div></div>
+<div><div class="ii-v">115g</div><div class="ii-l">Prot.</div></div>
+<div><div class="ii-v">65g</div><div class="ii-l">Lip.</div></div>
+<div><div class="ii-v">2300</div><div class="ii-l">TDEE</div></div>
+</div></div>`,
+
+    pac:`<div class="acard"><div class="asec">Pacientes cadastrados</div>
+${PATS.map(p=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid rgba(0,0,0,.06)">
+<div class="fb-av" style="background:${p.bg};color:${p.cl};width:30px;height:30px">${p.in}</div>
+<div style="flex:1"><div style="font-size:12px;font-weight:600;color:#111">${p.n}</div>
+<div style="font-size:9px;color:#9CA3AF">${p.conds.join(' · ')}</div></div>
+<span style="font-size:9px;padding:2px 7px;border-radius:8px;background:${p.adh>=80?'#E4F3EA':p.adh>=60?'#FBF3E0':'#FAEAEA'};color:${adColor(p.adh)};font-weight:700">${p.adh}%</span>
+</div>`).join('')}
+<button style="width:100%;padding:9px;background:#0A2316;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:500;cursor:pointer;margin-top:10px" onclick="alert('Modal de cadastro + IIFYM automático')">+ Novo paciente</button>
+</div>`,
+
+    plano:`<div class="acard"><div class="asec">🥗 Plano Alimentar</div>
+<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+<div class="fb-av" style="background:#E4F3EA;color:#2D5A3D;width:30px;height:30px">MS</div>
+<div><div style="font-size:12px;font-weight:600;color:#111">Maria Silva</div><div style="font-size:9px;color:#9CA3AF">Meta: 1800 kcal</div></div>
+</div>
+<input style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid rgba(0,0,0,.1);font-size:11px;color:#111;outline:none;margin-bottom:8px;background:#F5F1EA" placeholder="🔍 Buscar na tabela TACO (50 alimentos)...">
+<div style="border:0.5px solid rgba(0,0,0,.08);border-radius:8px;overflow:hidden">
+${['Peito de frango grelhado · 150g · 239 kcal','Arroz integral cozido · 150g · 186 kcal','Brócolis cru · 100g · 34 kcal'].map(i=>`<div style="padding:8px 10px;border-bottom:0.5px solid rgba(0,0,0,.06);font-size:10px;color:#111;display:flex;justify-content:space-between;align-items:center"><span>${i.split(' · ')[0]}<br><span style="color:#9CA3AF">${i.split(' · ').slice(1).join(' · ')}</span></span><button style="font-size:9px;padding:3px 8px;background:#0A2316;color:#fff;border:none;border-radius:5px;cursor:pointer" onclick="alert('Adicionado ao plano!')">+</button></div>`).join('')}
+</div></div>`,
+
+    feedback:`<div class="acard" style="background:#FBF3E0;border-color:rgba(196,154,60,.2)"><div style="font-size:10px;color:#633806;line-height:1.5">📖 Entradas do diário pessoal dos pacientes para acompanhamento clínico</div></div>
+${MSGS.map(m=>`<div class="fb-item ${m.ur?'ur':''}">
+<div style="display:flex;gap:8px;align-items:center"><div class="fb-av" style="background:${m.bg};color:${m.cl}">${m.in}</div>
+<div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between"><span class="fb-nm">${m.nm}</span><span style="font-size:15px">${m.mood}</span></div>
+<div class="fb-tm">${m.tm}</div><div class="fb-pv">${m.pv}</div></div></div></div>`).join('')}`,
+
+    ia:`<div class="acard"><div class="asec">🧠 IA Consultora</div>
+<div style="background:#E4F3EA;border-radius:8px;padding:10px;font-size:11px;color:#2D5A3D;line-height:1.6;margin-bottom:10px">Consulte alimentos terapêuticos por patologia com mecanismos de ação bioquímicos.</div>
+<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">
+${['Depressão','Ansiedade','Hipertensão','Diabetes t.2','Anemia','Hipotireoidismo'].map(p=>`<span style="padding:4px 9px;border-radius:9px;font-size:10px;border:0.5px solid rgba(0,0,0,.1);color:#9CA3AF;cursor:pointer;background:#fff" onclick="alert('Consultando IA sobre '+this.textContent)">${p}</span>`).join('')}
+</div>
+<input style="width:100%;padding:8px 10px;border-radius:8px;border:0.5px solid rgba(0,0,0,.1);font-size:11px;color:#111;outline:none;background:#F5F1EA" placeholder="Pergunte sobre nutrição clínica...">
+</div>`,
+  };
+  document.getElementById('a-content').innerHTML=pages[AS.ap]||pages.dash;
+  document.querySelectorAll('.an').forEach(b=>b.classList.toggle('on',b.dataset.ap===AS.ap));
+}
+
+document.querySelectorAll('.pn').forEach(b=>{b.onclick=()=>{PS.pp=b.dataset.pp;renderPatient();};});
+document.querySelectorAll('.an').forEach(b=>{b.onclick=()=>{AS.ap=b.dataset.ap;renderAdmin();};});
+
+function tick(){
+  const t=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  ['clock1','clock2'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=t;});
+}
+tick();setInterval(tick,15000);
+renderPatient();
+renderAdmin();
+</script>
+</body>
+</html>

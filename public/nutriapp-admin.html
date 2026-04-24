@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriApp — Painel do Nutricionista</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sb: #0A2E20; --forest: #0D3D2E; --sage: #3D6B52; --sage2: #5A8F72;
+  --mint: #B8DECA; --mint-lt: #E8F5EE; --cream: #F2EFE9; --warm: #FAFAF8;
+  --ink: #131C17; --ink2: #2E4038; --muted: #6B8278; --border: rgba(13,61,46,.12);
+  --terra: #B85C38; --terra-lt: #F5E8E2; --gold: #C9963A; --gold-lt: #FDF3E0;
+  --blue: #1E4D7B; --blue-lt: #E3EFF8; --red: #C0392B; --red-lt: #FDECEA;
+  --card: #fff; --sh: 0 1px 8px rgba(13,61,46,.08); --sh-md: 0 4px 20px rgba(13,61,46,.12);
+  --r: 10px; --r-lg: 14px; --r-xl: 18px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; overflow: hidden; }
+a { color: var(--sage); }
+
+/* ── LAYOUT ── */
+.shell { display: flex; height: 100vh; overflow: hidden; }
+
+/* ── SIDEBAR ── */
+.sb { width: 220px; background: var(--sb); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+.sb::-webkit-scrollbar { display: none; }
+.sb-brand { padding: 22px 18px 16px; border-bottom: 1px solid rgba(255,255,255,.07); }
+.sb-logo { font-family: 'Fraunces', Georgia, serif; font-size: 22px; font-weight: 600; color: #fff; letter-spacing: -.3px; }
+.sb-logo em { color: var(--mint); font-style: normal; }
+.sb-badge { display: inline-block; margin-top: 5px; font-size: 10px; background: rgba(184,222,202,.15); color: var(--mint); padding: 2px 8px; border-radius: 20px; letter-spacing: .7px; font-weight: 600; }
+.sb-user { padding: 13px 18px; border-bottom: 1px solid rgba(255,255,255,.07); display: flex; align-items: center; gap: 10px; }
+.sb-av { width: 36px; height: 36px; border-radius: 50%; background: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.sb-uname { font-size: 13px; color: #fff; font-weight: 500; }
+.sb-urole { font-size: 10px; color: rgba(255,255,255,.35); margin-top: 1px; }
+.sb-sec { padding: 14px 18px 5px; font-size: 10px; font-weight: 700; color: rgba(255,255,255,.25); letter-spacing: 1px; text-transform: uppercase; }
+.si { display: flex; align-items: center; gap: 11px; padding: 10px 18px; cursor: pointer; border-left: 2px solid transparent; transition: background .15s; position: relative; }
+.si:hover { background: rgba(255,255,255,.05); }
+.si.on { background: rgba(184,222,202,.1); border-left-color: var(--mint); }
+.si-ic { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+.si-lb { font-size: 13px; color: rgba(255,255,255,.5); flex: 1; transition: color .15s; }
+.si.on .si-lb { color: #fff; font-weight: 600; }
+.si-ct { background: var(--terra); color: #fff; font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 700; }
+.sb-foot { padding: 14px 18px; margin-top: auto; border-top: 1px solid rgba(255,255,255,.07); font-size: 10px; color: rgba(255,255,255,.2); line-height: 1.7; }
+.sb-foot a { color: rgba(184,222,202,.5); }
+.sb-logout { width: 100%; margin: 0 0 10px; padding: 9px 10px; border-radius: var(--r); border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04); color: rgba(255,255,255,.58); font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .15s; }
+.sb-logout:hover { background: rgba(184,222,202,.10); border-color: rgba(184,222,202,.22); color: #fff; }
+
+/* ── MAIN ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.topbar { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 24px; height: 58px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; box-shadow: 0 1px 0 var(--border); }
+.tb-left { display: flex; align-items: center; gap: 12px; }
+.tb-title { font-family: 'Fraunces', Georgia, serif; font-size: 20px; color: var(--ink); font-weight: 500; }
+.tb-sub { font-size: 12px; color: var(--muted); }
+.tb-right { display: flex; align-items: center; gap: 8px; }
+.content { flex: 1; overflow-y: auto; padding: 22px 24px; background: var(--cream); }
+.content::-webkit-scrollbar { width: 5px; }
+.content::-webkit-scrollbar-track { background: transparent; }
+.content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ── PAGE ANIM ── */
+.page { animation: pi .2s ease; }
+@keyframes pi { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── BUTTONS ── */
+.btn { padding: 9px 18px; border-radius: var(--r); border: none; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: var(--forest); color: #fff; }
+.btn-primary:hover { background: var(--sage); }
+.btn-secondary { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-secondary:hover { background: var(--mint-lt); border-color: var(--mint); color: var(--sage); }
+.btn-danger { background: var(--red-lt); color: var(--red); border: 1px solid rgba(192,57,43,.2); }
+.btn-danger:hover { background: var(--red); color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-w { width: 100%; justify-content: center; }
+
+/* ── CARDS ── */
+.card { background: var(--card); border-radius: var(--r-lg); border: 1px solid var(--border); padding: 18px; box-shadow: var(--sh); margin-bottom: 14px; }
+.sec { font-family: 'Fraunces', Georgia, serif; font-size: 15px; color: var(--ink); margin-bottom: 12px; font-weight: 500; }
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+/* ── TAGS ── */
+.tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; display: inline-block; }
+.tag-g { background: var(--mint-lt); color: #0F6E56; }
+.tag-a { background: var(--gold-lt); color: #854F0B; }
+.tag-r { background: var(--red-lt); color: var(--red); }
+.tag-b { background: var(--blue-lt); color: var(--blue); }
+
+/* ── STAT GRID ── */
+.stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+.stat-card { background: var(--card); border-radius: var(--r-lg); border: 1px solid var(--border); padding: 18px; box-shadow: var(--sh); transition: transform .2s; }
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--sh-md); }
+.stat-icon { font-size: 22px; margin-bottom: 10px; display: block; }
+.stat-val { font-family: 'Fraunces', Georgia, serif; font-size: 28px; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+.stat-lbl { font-size: 12px; color: var(--muted); }
+.stat-trend { font-size: 11px; margin-top: 8px; font-weight: 600; }
+.up { color: #3B6D11; } .dn { color: #A32D2D; }
+
+/* ── TWO COL ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+/* ── ADHERE ── */
+.adh-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.adh-name { font-size: 12px; color: var(--ink); width: 95px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.adh-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.adh-fill { height: 100%; border-radius: 3px; }
+.adh-pct { font-size: 11px; font-weight: 700; color: var(--ink); width: 32px; text-align: right; }
+
+/* ── BAR CHART ── */
+.bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 100px; margin: 12px 0 8px; padding: 0 2px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.bar-rect { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; }
+.bar-lbl { font-size: 9px; color: var(--muted); }
+.bar-val { font-size: 9px; font-weight: 700; color: #3B6D11; }
+
+/* ── IIFYM BOX ── */
+.iifym-box { background: var(--forest); border-radius: var(--r-lg); padding: 16px; }
+.iifym-title { font-size: 10px; color: var(--mint); letter-spacing: .7px; margin-bottom: 12px; font-weight: 700; text-transform: uppercase; }
+.iifym-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 8px; }
+.iifym-val { font-family: 'Fraunces', Georgia, serif; font-size: 20px; font-weight: 600; color: #fff; text-align: center; }
+.iifym-lbl { font-size: 10px; color: rgba(255,255,255,.45); text-align: center; margin-top: 3px; }
+.iifym-sub { font-size: 11px; color: rgba(184,222,202,.65); line-height: 1.6; margin-top: 6px; }
+
+/* ── PATIENT GRID ── */
+.pat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.pat-card { background: var(--card); border-radius: var(--r-lg); border: 1px solid var(--border); padding: 18px; cursor: pointer; transition: all .2s; box-shadow: var(--sh); }
+.pat-card:hover { border-color: var(--sage2); transform: translateY(-2px); box-shadow: var(--sh-md); }
+.pat-card.new-card { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 200px; border: 2px dashed var(--border); box-shadow: none; }
+.pat-card.new-card:hover { background: var(--mint-lt); border-color: var(--mint); }
+.pat-av { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; margin-bottom: 12px; }
+.pat-name { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.pat-meta { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.6; }
+.cond-tag { font-size: 10px; padding: 3px 8px; border-radius: 10px; background: var(--mint-lt); color: #0F6E56; font-weight: 600; display: inline-block; margin: 2px 2px 0 0; }
+
+/* ── MSG ── */
+.msg-item { background: var(--card); border-radius: var(--r); border: 1px solid var(--border); display: flex; gap: 12px; padding: 13px; cursor: pointer; margin-bottom: 8px; border-left: 3px solid transparent; transition: all .15s; box-shadow: var(--sh); }
+.msg-item:hover { transform: translateX(3px); }
+.msg-item.unread { border-left-color: var(--sage); }
+.msg-av { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+.msg-sender { font-size: 13px; font-weight: 700; color: var(--ink); }
+.msg-time { font-size: 11px; color: var(--muted); }
+.msg-preview { font-size: 12px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── BUILDER ── */
+.builder { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; height: calc(100vh - 180px); }
+.panel { background: var(--card); border-radius: var(--r-lg); border: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--sh); }
+.panel-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 12px; }
+.search-inp { width: 100%; padding: 9px 12px; border-radius: var(--r); border: 1px solid var(--border); font-family: inherit; font-size: 13px; color: var(--ink); background: var(--warm); outline: none; margin-bottom: 10px; transition: border-color .15s; }
+.search-inp:focus { border-color: var(--sage); background: #fff; }
+.taco-list { flex: 1; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--r); }
+.taco-list::-webkit-scrollbar { width: 4px; } .taco-list::-webkit-scrollbar-thumb { background: var(--border); }
+.taco-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 13px; cursor: pointer; border-bottom: 1px solid var(--border); transition: background .12s; }
+.taco-item:last-child { border-bottom: none; }
+.taco-item:hover { background: var(--mint-lt); }
+.taco-name { font-size: 13px; color: var(--ink); font-weight: 500; margin-bottom: 2px; }
+.taco-meta { font-size: 10px; color: var(--muted); }
+.taco-kcal { font-size: 12px; font-weight: 700; color: var(--sage); white-space: nowrap; margin-left: 10px; }
+.add-form { background: var(--mint-lt); border-radius: var(--r); padding: 12px; margin-top: 10px; border: 1px solid var(--mint); }
+.add-form-name { font-size: 13px; font-weight: 700; color: var(--forest); margin-bottom: 3px; }
+.add-form-sub { font-size: 11px; color: var(--sage); margin-bottom: 10px; }
+.qty-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.qty-inp { width: 80px; padding: 8px; border-radius: var(--r); border: 1px solid var(--mint); font-family: inherit; font-size: 13px; text-align: center; outline: none; background: #fff; color: var(--ink); }
+.qty-inp:focus { border-color: var(--sage); }
+.meal-tabs { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 12px; }
+.meal-tab { padding: 5px 10px; border-radius: 10px; font-size: 11px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); color: var(--muted); background: var(--warm); transition: all .12s; }
+.meal-tab.on { background: var(--forest); color: #fff; border-color: var(--forest); }
+.meal-tab:hover:not(.on) { background: var(--mint-lt); border-color: var(--mint); color: var(--sage); }
+.plan-list { flex: 1; overflow-y: auto; }
+.plan-list::-webkit-scrollbar { width: 4px; } .plan-list::-webkit-scrollbar-thumb { background: var(--border); }
+.plan-item { display: flex; justify-content: space-between; align-items: center; padding: 9px 6px; border-bottom: 1px solid var(--border); }
+.plan-item:last-child { border-bottom: none; }
+.plan-item-name { font-size: 13px; color: var(--ink); font-weight: 500; }
+.plan-item-meta { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.plan-item-kcal { font-size: 12px; font-weight: 700; color: var(--sage); }
+.plan-item-del { font-size: 14px; cursor: pointer; color: var(--terra); padding: 2px 7px; border-radius: 5px; transition: background .12s; }
+.plan-item-del:hover { background: var(--terra-lt); }
+.plan-totals { background: var(--mint-lt); border-radius: var(--r); padding: 12px; margin-top: 10px; border: 1px solid var(--mint); }
+.plan-tot-grid { display: grid; grid-template-columns: repeat(5, 1fr); text-align: center; margin-bottom: 6px; }
+.pt-val { font-family: 'Fraunces', Georgia, serif; font-size: 16px; font-weight: 600; color: var(--forest); }
+.pt-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.empty-state { text-align: center; padding: 30px 16px; color: var(--muted); font-size: 13px; }
+.empty-icon { font-size: 32px; margin-bottom: 10px; display: block; }
+
+/* ── REPORTS ── */
+.report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.pie-legend { display: flex; flex-direction: column; gap: 8px; }
+.pie-leg-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.pie-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+/* ── AI ── */
+.ai-layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; height: calc(100vh - 170px); }
+.ai-sidebar { background: var(--card); border-radius: var(--r-lg); border: 1px solid var(--border); padding: 16px; overflow-y: auto; box-shadow: var(--sh); }
+.ai-sidebar::-webkit-scrollbar { width: 4px; } .ai-sidebar::-webkit-scrollbar-thumb { background: var(--border); }
+.ai-chat { background: var(--card); border-radius: var(--r-lg); border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--sh); }
+.ai-messages { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.ai-messages::-webkit-scrollbar { width: 4px; } .ai-messages::-webkit-scrollbar-thumb { background: var(--border); }
+.ai-msg { max-width: 84%; padding: 12px 14px; border-radius: 12px; font-size: 13px; line-height: 1.75; }
+.ai-msg.user { background: var(--forest); color: #fff; align-self: flex-end; border-radius: 12px 12px 2px 12px; }
+.ai-msg.bot { background: var(--mint-lt); color: var(--ink2); align-self: flex-start; border-radius: 12px 12px 12px 2px; border: 1px solid var(--mint); }
+.ai-msg.loading { background: var(--cream); color: var(--muted); font-style: italic; }
+.ai-footer { padding: 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; background: var(--warm); }
+.ai-input { flex: 1; padding: 10px 14px; border-radius: var(--r); border: 1px solid var(--border); font-family: inherit; font-size: 13px; color: var(--ink); background: #fff; outline: none; transition: border-color .15s; }
+.ai-input:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(61,107,82,.08); }
+.patho-chip { display: block; padding: 7px 12px; border-radius: 10px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); color: var(--muted); background: var(--warm); margin-bottom: 6px; transition: all .12s; }
+.patho-chip:hover { background: var(--mint-lt); border-color: var(--mint); color: var(--sage); }
+.patho-chip.on { background: var(--mint-lt); border-color: var(--sage); color: var(--forest); font-weight: 700; }
+.quick-btn { display: block; padding: 8px 10px; border-radius: var(--r); font-size: 12px; color: var(--muted); cursor: pointer; border: 1px solid var(--border); margin-bottom: 5px; transition: background .12s; }
+.quick-btn:hover { background: var(--mint-lt); border-color: var(--mint); color: var(--sage); }
+
+/* ── MODAL ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(3px); }
+.modal { background: var(--warm); border-radius: var(--r-xl); width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.25); animation: modalIn .2s ease; }
+.modal::-webkit-scrollbar { width: 5px; } .modal::-webkit-scrollbar-thumb { background: var(--border); }
+@keyframes modalIn { from { transform: scale(.96) translateY(8px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+.modal-head { padding: 22px 24px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--warm); z-index: 1; }
+.modal-title { font-family: 'Fraunces', Georgia, serif; font-size: 20px; color: var(--ink); }
+.modal-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.modal-body { padding: 20px 24px; }
+.modal-foot { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; align-items: center; gap: 8px; position: sticky; bottom: 0; background: var(--warm); }
+.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.frow.full { grid-template-columns: 1fr; }
+.frow.three { grid-template-columns: 1fr 1fr 1fr; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; }
+.field input, .field select, .field textarea { padding: 9px 12px; border-radius: var(--r); border: 1px solid var(--border); background: #fff; font-family: inherit; font-size: 13px; color: var(--ink); outline: none; transition: border-color .15s; -webkit-appearance: none; }
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--sage); box-shadow: 0 0 0 3px rgba(61,107,82,.08); }
+.field textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
+.info-box { background: var(--mint-lt); border-radius: var(--r); padding: 11px 14px; font-size: 12px; color: var(--sage2); line-height: 1.6; border: 1px solid var(--mint); }
+
+/* ── API KEY BANNER ── */
+.api-banner { background: var(--gold-lt); border-bottom: 1px solid rgba(201,150,58,.3); padding: 8px 24px; display: flex; align-items: center; gap: 12px; font-size: 13px; color: #854F0B; flex-shrink: 0; }
+.api-banner input { flex: 1; max-width: 380px; padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(201,150,58,.4); background: #fff; font-family: inherit; font-size: 13px; color: var(--ink); outline: none; }
+.api-banner input:focus { border-color: var(--gold); }
+
+/* ── MSG LAYOUT ── */
+.msg-layout { display: grid; grid-template-columns: 360px 1fr; gap: 18px; }
+
+/* ── UTIL ── */
+select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B8278' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px !important; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="shell" id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sb">
+    <div class="sb-brand">
+      <div class="sb-logo">Nutri<em>App</em></div>
+      <div class="sb-badge">ADMIN · NUTRICIONISTA</div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-av">DN</div>
+      <div>
+        <div class="sb-uname">Dra. Natalia Souza</div>
+        <div class="sb-urole">CRN 3 · 12345</div>
+      </div>
+    </div>
+    <nav>
+      <div class="sb-sec">Principal</div>
+      <div class="si on" data-p="dash"><span class="si-ic">📊</span><span class="si-lb">Dashboard</span></div>
+      <div class="si" data-p="pac"><span class="si-ic">👥</span><span class="si-lb">Pacientes</span></div>
+      <div class="si" data-p="plano"><span class="si-ic">🥗</span><span class="si-lb">Plano Alimentar</span></div>
+      <div class="sb-sec">Comunicação</div>
+      <div class="si" data-p="msgs"><span class="si-ic">💬</span><span class="si-lb">Mensagens</span><span class="si-ct" id="mbadge">3</span></div>
+      <div class="si" data-p="rel"><span class="si-ic">📈</span><span class="si-lb">Relatórios</span></div>
+      <div class="sb-sec">Ferramentas</div>
+      <div class="si" data-p="ia"><span class="si-ic">🧠</span><span class="si-lb">IA Consultora</span></div>
+    </nav>
+    <div class="sb-foot">
+      <button type="button" class="sb-logout" onclick="logout()"><span>↩</span><span>Sair</span></button>
+      🔒 LGPD Compliant<br>Dados criptografados<br>Uso profissional exclusivo
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- API KEY BANNER -->
+    <div class="api-banner" id="api-banner">
+      <span>🔑 IA Consultora protegida via backend server-side:</span>
+      <input type="password" id="api-key-inp" placeholder="sem chave no navegador" autocomplete="off">
+      <button class="btn btn-sm" onclick="saveApiKey()" style="background:var(--gold);color:#fff;border:none;font-family:inherit;padding:7px 14px;border-radius:var(--r);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Entendi</button>
+      <button onclick="document.getElementById('api-banner').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--gold);padding:0 4px;line-height:1">×</button>
+    </div>
+    <div class="topbar">
+      <div class="tb-left">
+        <div class="tb-title" id="ptitle">Dashboard</div>
+      </div>
+      <div class="tb-right" id="tactions"></div>
+    </div>
+    <div class="content" id="content"></div>
+  </div>
+
+  <!-- MODAL ROOT -->
+  <div id="mroot"></div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────
+const TACO = [
+  {id:1,n:"Arroz branco cozido",cal:128,c:28.1,p:2.5,f:0.2,fi:1.6,cat:"Cereais"},
+  {id:2,n:"Arroz integral cozido",cal:124,c:25.8,p:2.6,f:1.0,fi:2.7,cat:"Cereais"},
+  {id:3,n:"Aveia em flocos",cal:394,c:66.6,p:13.9,f:8.5,fi:9.1,cat:"Cereais"},
+  {id:4,n:"Quinoa cozida",cal:120,c:21.3,p:4.4,f:1.9,fi:2.8,cat:"Cereais"},
+  {id:5,n:"Macarrão integral cozido",cal:137,c:26.8,p:5.4,f:1.0,fi:3.5,cat:"Cereais"},
+  {id:6,n:"Pão integral",cal:253,c:47.2,p:9.4,f:3.4,fi:6.9,cat:"Cereais"},
+  {id:7,n:"Feijão carioca cozido",cal:76,c:13.6,p:4.8,f:0.5,fi:8.4,cat:"Leguminosas"},
+  {id:8,n:"Feijão preto cozido",cal:77,c:14.0,p:4.5,f:0.5,fi:8.4,cat:"Leguminosas"},
+  {id:9,n:"Lentilha cozida",cal:93,c:15.6,p:6.3,f:0.4,fi:7.9,cat:"Leguminosas"},
+  {id:10,n:"Grão-de-bico cozido",cal:164,c:27.4,p:8.9,f:2.6,fi:7.6,cat:"Leguminosas"},
+  {id:11,n:"Soja cozida",cal:141,c:11.5,p:12.4,f:5.7,fi:9.9,cat:"Leguminosas"},
+  {id:12,n:"Peito de frango grelhado",cal:159,c:0,p:32.1,f:2.9,fi:0,cat:"Carnes"},
+  {id:13,n:"Carne bovina magra grelhada",cal:163,c:0,p:28.0,f:5.2,fi:0,cat:"Carnes"},
+  {id:14,n:"Lombo suíno grelhado",cal:190,c:0,p:27.0,f:8.6,fi:0,cat:"Carnes"},
+  {id:15,n:"Peru assado",cal:159,c:0,p:29.8,f:4.0,fi:0,cat:"Carnes"},
+  {id:16,n:"Salmão grelhado",cal:185,c:0,p:27.3,f:8.1,fi:0,cat:"Peixes"},
+  {id:17,n:"Atum enlatado em água",cal:110,c:0,p:25.6,f:0.8,fi:0,cat:"Peixes"},
+  {id:18,n:"Tilápia assada",cal:128,c:0,p:26.2,f:2.7,fi:0,cat:"Peixes"},
+  {id:19,n:"Sardinha em lata",cal:192,c:0,p:24.5,f:10.5,fi:0,cat:"Peixes"},
+  {id:20,n:"Bacalhau cozido",cal:111,c:0,p:25.4,f:0.9,fi:0,cat:"Peixes"},
+  {id:21,n:"Ovo de galinha cozido",cal:146,c:0.6,p:13.0,f:9.5,fi:0,cat:"Ovos"},
+  {id:22,n:"Ovo mexido com azeite",cal:196,c:0.5,p:13.6,f:15.2,fi:0,cat:"Ovos"},
+  {id:23,n:"Batata-doce cozida",cal:77,c:18.4,p:0.6,f:0.1,fi:2.5,cat:"Tubérculos"},
+  {id:24,n:"Batata inglesa cozida",cal:52,c:11.4,p:1.5,f:0.1,fi:1.0,cat:"Tubérculos"},
+  {id:25,n:"Mandioca cozida",cal:125,c:30.1,p:0.6,f:0.3,fi:1.8,cat:"Tubérculos"},
+  {id:26,n:"Banana prata",cal:98,c:26.0,p:1.3,f:0.1,fi:2.0,cat:"Frutas"},
+  {id:27,n:"Maçã com casca",cal:56,c:15.2,p:0.3,f:0.1,fi:1.3,cat:"Frutas"},
+  {id:28,n:"Laranja pera",cal:37,c:8.9,p:1.0,f:0.1,fi:0.8,cat:"Frutas"},
+  {id:29,n:"Abacate",cal:96,c:6.0,p:1.2,f:8.4,fi:6.3,cat:"Frutas"},
+  {id:30,n:"Mamão papaia",cal:40,c:10.4,p:0.5,f:0.1,fi:1.8,cat:"Frutas"},
+  {id:31,n:"Uva itália",cal:69,c:17.9,p:0.7,f:0.2,fi:0.9,cat:"Frutas"},
+  {id:32,n:"Brócolis cru",cal:34,c:3.6,p:4.4,f:0.5,fi:3.0,cat:"Vegetais"},
+  {id:33,n:"Espinafre cru",cal:22,c:3.4,p:2.5,f:0.3,fi:2.2,cat:"Vegetais"},
+  {id:34,n:"Cenoura crua",cal:34,c:7.7,p:0.6,f:0.2,fi:3.2,cat:"Vegetais"},
+  {id:35,n:"Tomate cru",cal:15,c:3.1,p:0.9,f:0.2,fi:1.2,cat:"Vegetais"},
+  {id:36,n:"Alface crespa crua",cal:11,c:1.4,p:1.3,f:0.3,fi:1.8,cat:"Vegetais"},
+  {id:37,n:"Couve refogada",cal:34,c:4.0,p:3.0,f:0.8,fi:2.0,cat:"Vegetais"},
+  {id:38,n:"Abobrinha refogada",cal:19,c:3.8,p:0.9,f:0.3,fi:1.0,cat:"Vegetais"},
+  {id:39,n:"Beterraba cozida",cal:36,c:8.4,p:1.3,f:0.1,fi:2.1,cat:"Vegetais"},
+  {id:40,n:"Iogurte natural desnatado",cal:36,c:4.9,p:3.5,f:0.1,fi:0,cat:"Lácteos"},
+  {id:41,n:"Iogurte grego integral",cal:115,c:5.2,p:9.9,f:5.5,fi:0,cat:"Lácteos"},
+  {id:42,n:"Leite integral pasteurizado",cal:61,c:4.7,p:3.2,f:3.2,fi:0,cat:"Lácteos"},
+  {id:43,n:"Queijo minas frescal",cal:264,c:3.2,p:17.4,f:20.2,fi:0,cat:"Lácteos"},
+  {id:44,n:"Requeijão cremoso light",cal:128,c:4.0,p:8.0,f:9.0,fi:0,cat:"Lácteos"},
+  {id:45,n:"Azeite de oliva extra virgem",cal:884,c:0,p:0,f:100,fi:0,cat:"Óleos"},
+  {id:46,n:"Amendoim torrado s/ sal",cal:581,c:19.9,p:26.4,f:47.5,fi:8.0,cat:"Oleaginosas"},
+  {id:47,n:"Castanha-do-brasil",cal:656,c:12.3,p:14.3,f:63.5,fi:7.5,cat:"Oleaginosas"},
+  {id:48,n:"Amêndoa crua",cal:581,c:21.7,p:21.1,f:47.7,fi:12.5,cat:"Oleaginosas"},
+  {id:49,n:"Whey protein concentrado",cal:353,c:36.2,p:42.0,f:6.0,fi:0,cat:"Suplementos"},
+  {id:50,n:"Creatina monohidratada",cal:0,c:0,p:0,f:0,fi:0,cat:"Suplementos"},
+];
+
+const MEALS = ["Café da manhã","Lanche manhã","Almoço","Lanche tarde","Jantar","Ceia"];
+
+let PATS = [
+  {id:1,n:"Maria Silva",in:"MS",cl:"#3D6B52",bg:"#E8F5EE",age:35,g:"F",w:72,h:165,bf:28,act:"moderado",goal:"deficit",conds:["Depressão","Ansiedade"],notes:"Prefere alimentos naturais. Evita glúten. Trabalha em escritório.",adh:82,plan:{},dt:"Jan 2025"},
+  {id:2,n:"João Costa",in:"JC",cl:"#1E4D7B",bg:"#E3EFF8",age:45,g:"M",w:88,h:178,bf:null,act:"leve",goal:"deficit",conds:["Hipertensão","Sobrepeso"],notes:"Home office. Gosta de cozinhar. Evita peixes.",adh:68,plan:{},dt:"Fev 2025"},
+  {id:3,n:"Ana Ferreira",in:"AF",cl:"#993C1D",bg:"#FAECE7",age:28,g:"F",w:58,h:162,bf:22,act:"ativo",goal:"surplus",conds:["Anemia ferropriva"],notes:"Musculação 4×/semana. Vegetariana. Alérgica a amendoim.",adh:91,plan:{},dt:"Mar 2025"},
+];
+
+let MSGS = [
+  {id:1,pid:1,pn:"Maria Silva",in:"MS",cl:"#3D6B52",bg:"#E8F5EE",prev:"Consegui todas as refeições hoje! Humor muito melhor 😊",time:"Hoje, 09:14",mood:"😊",ur:true,full:"Oi doutora! Hoje consegui fazer todas as refeições do plano pela primeira vez na semana. Humor muito mais estável e tive muito mais energia para trabalhar. A adição do salmão e da aveia fez diferença. Obrigada pelo acompanhamento!"},
+  {id:2,pid:2,pn:"João Costa",in:"JC",cl:"#1E4D7B",bg:"#E3EFF8",prev:"Tive dificuldade no almoço, saí para reunião... 😟",time:"Ontem, 18:40",mood:"😟",ur:true,full:"Tive dificuldade no almoço de ontem. Fui a uma reunião e acabei comendo em restaurante. Tentei escolher o mais saudável possível — grelhado com salada — mas sei que saiu do plano. O que a senhora sugere para essas situações?"},
+  {id:3,pid:3,pn:"Ana Ferreira",in:"AF",cl:"#993C1D",bg:"#FAECE7",prev:"Semana ótima! Adesão 100% e peso +0.4kg 💪",time:"Ontem, 12:00",mood:"💪",ur:true,full:"Semana excelente! Todos os treinos realizados e adesão 100% ao plano. O peso subiu 0.4kg — acredito que seja massa magra pois as medidas melhoraram. Continuo com o ferro conforme orientado."},
+  {id:4,pid:1,pn:"Maria Silva",in:"MS",cl:"#3D6B52",bg:"#E8F5EE",prev:"Posso substituir o salmão? Estava caro essa semana 🤔",time:"2 dias, 15:30",mood:"🤔",ur:false,full:"Doutora, posso substituir o salmão esta semana? Estava caro na feira. Tem alguma alternativa com benefício similar para o ômega-3? Vi que sardinha é mais acessível — serviria?"},
+];
+
+let S = {pg:"dash", selPat:PATS[0], selMsg:null, mealTab:"Café da manhã", tq:"", tsel:null, aiMsgs:[], aiPatho:"", aiLoad:false};
+
+// ─── API KEY ─────────────────────────────────────────────
+let API_KEY = "server-side";
+function saveApiKey() {
+  document.getElementById("api-banner").style.display = "none";
+  alert("✅ Segurança aplicada: a chave da IA fica apenas no backend.");
+}
+
+// ─── IIFYM ───────────────────────────────────────────────
+function iifym(p) {
+  let bmr, met;
+  const bf = parseFloat(p.bf) || null;
+  if (bf && bf > 0 && bf < 60) {
+    const lbm = p.w * (1 - bf / 100);
+    bmr = 370 + 21.6 * lbm;
+    met = `Katch-McArdle · BF=${bf}% · LMM=${lbm.toFixed(1)}kg`;
+  } else {
+    bmr = p.g === "M" ? 10*p.w + 6.25*p.h - 5*p.age + 5 : 10*p.w + 6.25*p.h - 5*p.age - 161;
+    met = `Mifflin-St Jeor · ${p.g === "M" ? "Masculino" : "Feminino"}`;
+  }
+  const mlt = {sedentario:1.2, leve:1.375, moderado:1.55, ativo:1.725, muito_ativo:1.9}[p.act] || 1.55;
+  const tdee = bmr * mlt;
+  const kcal = p.goal === "deficit" ? tdee - 500 : p.goal === "surplus" ? tdee + 300 : tdee;
+  const lbm2 = bf ? p.w * (1 - bf/100) : p.w * 0.82;
+  const pr = Math.round(lbm2 * 2);
+  const ft = Math.round(p.w * 0.9);
+  const cb = Math.round(Math.max(0, kcal - pr * 4 - ft * 9) / 4);
+  return { kcal:Math.round(kcal), tdee:Math.round(tdee), bmr:Math.round(bmr), pr, ft, cb, met };
+}
+
+function planTotals(plan) {
+  let cal=0, c=0, pr=0, f=0, fi=0;
+  Object.values(plan).forEach(m => (m||[]).forEach(i => {
+    const s = i.q / 100;
+    cal += i.food.cal*s; c += i.food.c*s; pr += i.food.p*s; f += i.food.f*s; fi += i.food.fi*s;
+  }));
+  return { cal:Math.round(cal), c:Math.round(c), pr:Math.round(pr), f:Math.round(f), fi:Math.round(fi) };
+}
+
+function unread() { return MSGS.filter(m => m.ur).length; }
+function updBadge() {
+  const el = document.getElementById("mbadge");
+  if (el) { const n = unread(); el.textContent = n; el.style.display = n ? "inline" : "none"; }
+}
+function adColor(v) { return v >= 80 ? "#3B6D11" : v >= 60 ? "#C9963A" : "#C0392B"; }
+function adTag(v) { return v >= 80 ? "tag-g" : v >= 60 ? "tag-a" : "tag-r"; }
+
+// ─── DASHBOARD ───────────────────────────────────────────
+function rDash() {
+  const avg = Math.round(PATS.reduce((a,p) => a + p.adh, 0) / PATS.length);
+  const ii = iifym(PATS[0]);
+  const wv = [68,72,76,80,78,84,80];
+  const maxW = Math.max(...wv);
+  return `<div class="page">
+<div class="stat-grid">
+  <div class="stat-card"><span class="stat-icon">👥</span><div class="stat-val">${PATS.length}</div><div class="stat-lbl">Pacientes ativos</div><div class="stat-trend up">↑ +1 este mês</div></div>
+  <div class="stat-card"><span class="stat-icon">📋</span><div class="stat-val">${PATS.filter(p=>Object.keys(p.plan).length>0).length}</div><div class="stat-lbl">Planos configurados</div><div class="stat-trend up">↑ em andamento</div></div>
+  <div class="stat-card"><span class="stat-icon">📊</span><div class="stat-val">${avg}%</div><div class="stat-lbl">Adesão média</div><div class="stat-trend ${avg>=75?"up":"dn"}">${avg>=75?"↑ Boa adesão":"↓ Atenção necessária"}</div></div>
+  <div class="stat-card"><span class="stat-icon">💬</span><div class="stat-val">${unread()}</div><div class="stat-lbl">Msgs não lidas</div><div class="stat-trend dn">Aguardando resposta</div></div>
+</div>
+<div class="two-col">
+  <div>
+    <p class="sec">Adesão dos pacientes</p>
+    <div class="card">
+      ${PATS.map(p=>`<div class="adh-row"><div class="adh-name">${p.n.split(" ")[0]} ${p.n.split(" ")[1][0]}.</div><div class="adh-bar"><div class="adh-fill" style="width:${p.adh}%;background:${adColor(p.adh)}"></div></div><div class="adh-pct">${p.adh}%</div><span class="tag ${adTag(p.adh)}">${p.adh>=80?"Ótimo":p.adh>=60?"Regular":"Baixo"}</span></div>`).join("")}
+      <div class="divider"></div>
+      <div style="font-size:12px;color:var(--muted)">Média geral: <strong style="color:var(--ink)">${avg}%</strong></div>
+    </div>
+    <p class="sec">Últimas mensagens</p>
+    ${MSGS.slice(0,3).map(m=>`<div class="msg-item ${m.ur?"unread":""}" onclick="goMsg(${m.id});rp()"><div class="msg-av" style="background:${m.bg};color:${m.cl}">${m.in}</div><div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between;align-items:center"><span class="msg-sender">${m.pn}</span><span style="font-size:18px">${m.mood}</span></div><div class="msg-time">${m.time}</div><div class="msg-preview">${m.prev}</div></div></div>`).join("")}
+  </div>
+  <div>
+    <p class="sec">Adesão média — 7 dias</p>
+    <div class="card">
+      <div class="bar-chart">
+        ${wv.map((v,i)=>{ const d=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"]; const h=Math.round(v/maxW*88); return`<div class="bar-col"><div class="bar-val">${v}%</div><div class="bar-rect" style="height:${h}px;background:${adColor(v)}"></div><div class="bar-lbl">${d[i]}</div></div>`; }).join("")}
+      </div>
+      <div style="font-size:11px;color:var(--muted)">Melhor dia: Sáb 84% · Pior dia: Seg 68%</div>
+    </div>
+    <p class="sec" style="margin-top:4px">IIFYM — ${PATS[0].n.split(" ")[0]}</p>
+    <div class="iifym-box">
+      <div class="iifym-title">Meta calculada · ${ii.met}</div>
+      <div class="iifym-grid">
+        <div><div class="iifym-val">${ii.kcal}</div><div class="iifym-lbl">kcal/dia</div></div>
+        <div><div class="iifym-val">${ii.cb}g</div><div class="iifym-lbl">Carbos</div></div>
+        <div><div class="iifym-val">${ii.pr}g</div><div class="iifym-lbl">Proteína</div></div>
+        <div><div class="iifym-val">${ii.ft}g</div><div class="iifym-lbl">Lipídios</div></div>
+        <div><div class="iifym-val">${ii.tdee}</div><div class="iifym-lbl">TDEE</div></div>
+      </div>
+      <div class="iifym-sub">BMR: ${ii.bmr} kcal · Objetivo: ${PATS[0].goal==="deficit"?"Déficit −500 kcal":"Surplus +300 kcal"} · Proteína: 2g/kg MLM · Lipídios: 0.9g/kg</div>
+    </div>
+  </div>
+</div>
+</div>`;
+}
+
+// ─── PACIENTES ───────────────────────────────────────────
+function rPac() {
+  return `<div class="page">
+<div class="pat-grid">
+  ${PATS.map(p => {
+    const ii = iifym(p);
+    return `<div class="pat-card" onclick="openEdit(${p.id})">
+      <div class="pat-av" style="background:${p.bg};color:${p.cl}">${p.in}</div>
+      <div class="pat-name">${p.n}</div>
+      <div class="pat-meta">${p.age} anos · ${p.w}kg · ${p.h}cm${p.bf?` · BF ${p.bf}%`:""}<br>Meta IIFYM: <strong>${ii.kcal} kcal</strong> · P:${ii.pr}g C:${ii.cb}g L:${ii.ft}g</div>
+      <div style="margin-bottom:10px">${p.conds.map(c=>`<span class="cond-tag">${c}</span>`).join("")}</div>
+      <div class="adh-row" style="margin-bottom:6px"><div class="adh-bar"><div class="adh-fill" style="width:${p.adh}%;background:${adColor(p.adh)}"></div></div><span class="tag ${adTag(p.adh)}" style="margin-left:8px">${p.adh}%</span></div>
+      ${p.notes ? `<div style="font-size:11px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);line-height:1.5">${p.notes}</div>` : ""}
+      <div style="font-size:10px;color:var(--muted);margin-top:8px">Cadastrado em ${p.dt}</div>
+    </div>`;
+  }).join("")}
+  <div class="pat-card new-card" onclick="openAdd()">
+    <span style="font-size:36px;margin-bottom:12px">➕</span>
+    <div style="font-size:14px;font-weight:700;color:var(--muted)">Novo paciente</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center">Cadastrar + calcular IIFYM</div>
+  </div>
+</div>
+</div>`;
+}
+
+// ─── PLANO ───────────────────────────────────────────────
+function rPlano() {
+  const p = S.selPat;
+  const ii = iifym(p);
+  const tf = TACO.filter(f => f.n.toLowerCase().includes(S.tq.toLowerCase()) || f.cat.toLowerCase().includes(S.tq.toLowerCase())).slice(0, 28);
+  const mi = p.plan[S.mealTab] || [];
+  const t = planTotals(p.plan);
+  const diff = t.cal - ii.kcal;
+  const diffCol = Math.abs(diff) < 100 ? "#3B6D11" : diff > 0 ? "#C0392B" : "#1E4D7B";
+  const diffTxt = Math.abs(diff) < 100 ? "✅ Na meta" : diff > 0 ? "⚠️ Acima da meta" : "⚠️ Abaixo da meta";
+
+  return `<div class="page">
+<div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+  <div style="display:flex;align-items:center;gap:14px">
+    <div class="pat-av" style="background:${p.bg};color:${p.cl};width:48px;height:48px;font-size:15px;margin-bottom:0">${p.in}</div>
+    <div>
+      <div style="font-size:15px;font-weight:700;color:var(--ink)">${p.n}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">${p.age} anos · ${p.w}kg · ${p.h}cm${p.bf?` · BF ${p.bf}%`:""} · Meta: <strong style="color:var(--forest)">${ii.kcal} kcal</strong> · P:${ii.pr}g C:${ii.cb}g L:${ii.ft}g</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">${p.conds.join(" · ")}</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <select onchange="selPat(this.value)" style="padding:8px 28px 8px 12px;border-radius:var(--r);border:1px solid var(--border);font-family:inherit;font-size:13px;color:var(--ink);background:#fff url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22%3E%3Cpath d=%22M1 1l5 5 5-5%22 stroke=%22%236B8278%22 stroke-width=%221.5%22 fill=%22none%22/%3E%3C/svg%3E') no-repeat right 10px center;cursor:pointer;outline:none;">
+      ${PATS.map(pt=>`<option value="${pt.id}" ${pt.id===p.id?"selected":""}>${pt.n}</option>`).join("")}
+    </select>
+    <button class="btn btn-primary" onclick="savePlan()">💾 Salvar e enviar</button>
+  </div>
+</div>
+<div class="builder">
+  <!-- TACO PANEL -->
+  <div class="panel">
+    <div class="panel-title">🔍 Tabela TACO — Unicamp (${TACO.length} alimentos)</div>
+    <input class="search-inp" placeholder="Pesquisar alimento ou categoria..." value="${S.tq}" oninput="S.tq=this.value;rp()">
+    <div class="taco-list">
+      ${tf.length === 0
+        ? `<div class="empty-state"><span class="empty-icon">🔍</span>Nenhum alimento encontrado</div>`
+        : tf.map(f=>`<div class="taco-item" onclick="selFood(${f.id})">
+            <div><div class="taco-name">${f.n}</div><div class="taco-meta">${f.cat} · C:${f.c}g P:${f.p}g L:${f.f}g Fi:${f.fi}g (por 100g)</div></div>
+            <div class="taco-kcal">${f.cal} kcal</div>
+          </div>`).join("")}
+    </div>
+    ${S.tsel ? (() => {
+      const fd = TACO.find(x => x.id === S.tsel);
+      return `<div class="add-form">
+        <div class="add-form-name">${fd.n}</div>
+        <div class="add-form-sub">${fd.cat} · ${fd.cal} kcal/100g · C:${fd.c}g P:${fd.p}g L:${fd.f}g Fi:${fd.fi}g</div>
+        <div class="qty-row">
+          <input class="qty-inp" type="number" id="qinp" value="100" min="1" max="2000" placeholder="100">
+          <span style="font-size:12px;color:var(--muted)">gramas</span>
+          <button class="btn btn-primary btn-sm" onclick="addFood()">+ Adicionar ao ${S.mealTab}</button>
+          <button class="btn btn-secondary btn-sm" onclick="S.tsel=null;rp()">✕ Cancelar</button>
+        </div>
+      </div>`;
+    })() : ""}
+  </div>
+  <!-- PLANO PANEL -->
+  <div class="panel">
+    <div class="panel-title">📋 Plano alimentar do dia</div>
+    <div class="meal-tabs">
+      ${MEALS.map(m=>`<div class="meal-tab ${S.mealTab===m?"on":""}" onclick="S.mealTab='${m}';rp()">${m}${(p.plan[m]||[]).length>0?` <strong>(${(p.plan[m]||[]).length})</strong>`:""}</div>`).join("")}
+    </div>
+    <div class="plan-list">
+      ${mi.length === 0
+        ? `<div class="empty-state"><span class="empty-icon">🥗</span>Nenhum alimento adicionado<br><small style="font-size:11px">Pesquise à esquerda e clique para adicionar</small></div>`
+        : mi.map((item, idx) => {
+            const s = item.q / 100;
+            return `<div class="plan-item">
+              <div>
+                <div class="plan-item-name">${item.food.n}</div>
+                <div class="plan-item-meta">${item.q}g · C:${Math.round(item.food.c*s)}g P:${Math.round(item.food.p*s)}g L:${Math.round(item.food.f*s)}g</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span class="plan-item-kcal">${Math.round(item.food.cal*s)} kcal</span>
+                <span class="plan-item-del" onclick="delItem('${S.mealTab}',${idx})">✕</span>
+              </div>
+            </div>`;
+          }).join("")}
+    </div>
+    <div class="plan-totals">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;margin-bottom:10px">Total do dia — todas as refeições</div>
+      <div class="plan-tot-grid">
+        <div><div class="pt-val">${t.cal}</div><div class="pt-lbl">kcal</div></div>
+        <div><div class="pt-val">${t.c}g</div><div class="pt-lbl">Carbos</div></div>
+        <div><div class="pt-val">${t.pr}g</div><div class="pt-lbl">Proteína</div></div>
+        <div><div class="pt-val">${t.f}g</div><div class="pt-lbl">Lipídios</div></div>
+        <div><div class="pt-val">${t.fi}g</div><div class="pt-lbl">Fibras</div></div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--muted)">
+        Meta: <strong>${ii.kcal} kcal</strong> · Saldo: <strong style="color:${diffCol}">${diff > 0 ? "+" : ""}${diff} kcal — ${diffTxt}</strong>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-w" onclick="savePlan()" style="margin-top:10px">💾 Salvar plano e enviar ao paciente</button>
+  </div>
+</div>
+</div>`;
+}
+
+// ─── MENSAGENS ───────────────────────────────────────────
+function rMsgs() {
+  return `<div class="page">
+<div class="msg-layout">
+  <div>
+    <p class="sec">Feedbacks dos pacientes</p>
+    ${MSGS.map(m=>`
+    <div class="msg-item ${m.ur?"unread":""}" onclick="openMsg(${m.id})">
+      <div class="msg-av" style="background:${m.bg};color:${m.cl}">${m.in}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <span class="msg-sender">${m.pn} ${m.ur?`<span class="tag tag-g" style="font-size:9px;margin-left:4px">NOVO</span>`:""}</span>
+          <span style="font-size:20px">${m.mood}</span>
+        </div>
+        <div class="msg-time">${m.time}</div>
+        <div class="msg-preview">${m.prev}</div>
+      </div>
+    </div>`).join("")}
+  </div>
+  <div>
+    ${S.selMsg ? (() => {
+      const m = MSGS.find(x => x.id === S.selMsg);
+      const p = PATS.find(x => x.id === m.pid);
+      const ii = iifym(p);
+      return `<p class="sec">Mensagem de ${m.pn}</p>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+          <div class="msg-av" style="background:${m.bg};color:${m.cl};width:46px;height:46px;font-size:14px">${m.in}</div>
+          <div>
+            <div style="font-size:16px;font-weight:700;color:var(--ink)">${m.pn} ${m.mood}</div>
+            <div class="msg-time">${m.time}</div>
+          </div>
+        </div>
+        <div style="font-size:14px;color:var(--ink2);line-height:1.8;margin-bottom:16px">${m.full}</div>
+        <div class="info-box" style="margin-bottom:14px">
+          <strong>Perfil:</strong> ${p.age} anos · ${p.w}kg · Meta ${ii.kcal} kcal/dia · Adesão: <strong>${p.adh}%</strong> · ${p.conds.join(", ")}
+        </div>
+        <textarea id="rpta" style="width:100%;padding:10px 12px;border-radius:var(--r);border:1px solid var(--border);font-family:inherit;font-size:13px;resize:vertical;min-height:90px;outline:none;line-height:1.6;background:#fff;color:var(--ink)" placeholder="Escreva sua resposta personalizada..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="sendReply(${m.id})">📤 Responder</button>
+          <button class="btn btn-secondary" onclick="goPlano(${p.id})">🥗 Ver plano</button>
+          <button class="btn btn-secondary" onclick="openEdit(${p.id})">👤 Ver paciente</button>
+        </div>
+      </div>`;
+    })() : `<div class="empty-state" style="margin-top:80px"><span class="empty-icon">💬</span><strong style="font-size:15px;color:var(--muted)">Selecione uma mensagem</strong><br><span style="margin-top:6px;display:block;font-size:13px;color:var(--muted)">Leia e responda os feedbacks dos pacientes</span></div>`}
+  </div>
+</div>
+</div>`;
+}
+
+// ─── RELATÓRIOS ──────────────────────────────────────────
+function rRel() {
+  const avg = Math.round(PATS.reduce((a,p) => a + p.adh, 0) / PATS.length);
+  return `<div class="page">
+<div class="stat-grid" style="margin-bottom:18px">
+  <div class="stat-card"><span class="stat-icon">🏆</span><div class="stat-val">91%</div><div class="stat-lbl">Melhor adesão</div><div class="stat-trend up">↑ Ana Ferreira</div></div>
+  <div class="stat-card"><span class="stat-icon">⚠️</span><div class="stat-val">68%</div><div class="stat-lbl">Menor adesão</div><div class="stat-trend dn">↓ João Costa</div></div>
+  <div class="stat-card"><span class="stat-icon">📊</span><div class="stat-val">${avg}%</div><div class="stat-lbl">Média geral</div><div class="stat-trend up">↑ Esta semana</div></div>
+  <div class="stat-card"><span class="stat-icon">💬</span><div class="stat-val">7</div><div class="stat-lbl">Feedbacks recebidos</div><div class="stat-trend up">↑ Alto engajamento</div></div>
+</div>
+<div class="report-grid">
+  <div>
+    <p class="sec">Adesão por paciente — 7 dias</p>
+    <div class="card">
+      ${PATS.map(p=>`<div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="pat-av" style="background:${p.bg};color:${p.cl};width:28px;height:28px;font-size:10px;margin-bottom:0">${p.in}</div>
+            <span style="font-size:13px;font-weight:700;color:var(--ink)">${p.n}</span>
+          </div>
+          <span class="tag ${adTag(p.adh)}">${p.adh}%</span>
+        </div>
+        <div class="adh-bar" style="height:8px"><div class="adh-fill" style="width:${p.adh}%;background:${adColor(p.adh)}"></div></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">${p.conds.join(" · ")}</div>
+      </div>`).join("")}
+      <div class="divider"></div>
+      <div style="font-size:12px;color:var(--muted)">Média geral: <strong style="color:var(--ink)">${avg}%</strong></div>
+    </div>
+    <p class="sec" style="margin-top:4px">Resumo mensal — Ana Ferreira</p>
+    <div class="card"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      ${[["Refeições feitas","92 / 100","↑ 92%","#3B6D11"],["Peso atual","58.4 kg","↑ +0.4 kg","#3B6D11"],["Água diária","87% da meta","↑ Ótimo","#3B6D11"],["Treinos/sem","4× / 4×","→ Meta atingida","#C9963A"]].map(([l,v,t,c])=>`
+      <div style="background:var(--cream);border-radius:var(--r);padding:12px">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">${l}</div>
+        <div style="font-family:'Fraunces',Georgia,serif;font-size:20px;font-weight:600;color:var(--ink)">${v}</div>
+        <div style="font-size:11px;color:${c};margin-top:4px;font-weight:600">${t}</div>
+      </div>`).join("")}
+    </div></div>
+  </div>
+  <div>
+    <p class="sec">Evolução calórica — Maria Silva (7 dias)</p>
+    <div class="card">
+      <div class="bar-chart">
+        ${[1650,1720,1800,1690,1800,1780,1800].map((v,i)=>{ const d=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"]; const h=Math.round(v/1900*96); const ok=Math.abs(v-1800)<100; return`<div class="bar-col"><div class="bar-val" style="font-size:8px;color:${ok?"#3B6D11":"#C9963A"}">${v}</div><div class="bar-rect" style="height:${h}px;background:${ok?"#5A8F72":"#C9963A"}"></div><div class="bar-lbl">${d[i]}</div></div>`;}).join("")}
+      </div>
+      <div style="font-size:11px;color:var(--muted)">Meta: 1.800 kcal/dia · <span style="color:#3B6D11;font-weight:600">Boa consistência ✅</span></div>
+    </div>
+    <p class="sec" style="margin-top:4px">Distribuição de macros — João Costa</p>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:24px">
+        <svg viewBox="0 0 120 120" width="110" height="110" style="flex-shrink:0">
+          <circle cx="60" cy="60" r="48" fill="none" stroke="#f0f0f0" stroke-width="22"/>
+          <circle cx="60" cy="60" r="48" fill="none" stroke="#5A8F72" stroke-width="22" stroke-dasharray="120.6 181" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+          <circle cx="60" cy="60" r="48" fill="none" stroke="#C9963A" stroke-width="22" stroke-dasharray="72.4 229" stroke-dashoffset="-120.6" transform="rotate(-90 60 60)"/>
+          <circle cx="60" cy="60" r="48" fill="none" stroke="#B85C38" stroke-width="22" stroke-dasharray="108.5 193" stroke-dashoffset="-193" transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="pie-legend">
+          <div class="pie-leg-item"><div class="pie-dot" style="background:#5A8F72"></div>Carboidratos — 39%</div>
+          <div class="pie-leg-item"><div class="pie-dot" style="background:#C9963A"></div>Proteínas — 23%</div>
+          <div class="pie-leg-item"><div class="pie-dot" style="background:#B85C38"></div>Lipídios — 35%</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px">Total: 2.180 kcal · Meta: 2.100 kcal</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>`;
+}
+
+// ─── IA CONSULTORA ───────────────────────────────────────
+function rIA() {
+  const pathos = ["Depressão","Ansiedade","Hipertensão","Diabetes tipo 2","Hipotireoidismo","Anemia ferropriva","Síndrome do intestino irritável","Dislipidemia","Obesidade","Osteoporose","Artrite reumatoide","Enxaqueca","TDAH","Pré-menopausa","Autismo (TEA)"];
+  const quick = ["Fontes de ômega-3 e EPA/DHA","Alimentos ricos em magnésio","Probióticos e eixo intestino-cérebro","Ferro heme vs não-heme","Triptofano e síntese de serotonina","Adaptógenos em nutrição clínica","Vitamina D — fontes e metabolismo","Antioxidantes e neuroinflamação"];
+  return `<div class="page">
+<div class="ai-layout">
+  <div class="ai-sidebar">
+    <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px">IA Consultora</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Selecione uma patologia ou faça uma pergunta livre sobre nutrição clínica.</div>
+    ${!API_KEY ? `<div style="background:var(--gold-lt);border:1px solid rgba(201,150,58,.3);border-radius:var(--r);padding:10px;font-size:12px;color:#854F0B;margin-bottom:12px">⚠️ <strong>Insira sua API key</strong> no banner acima para usar a IA.</div>` : ""}
+    <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">Patologias</div>
+    ${pathos.map(pt=>`<div class="patho-chip ${S.aiPatho===pt?"on":""}" onclick="selPatho('${pt}')">${pt}</div>`).join("")}
+    <div class="divider"></div>
+    <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">Consultas rápidas</div>
+    ${quick.map(q=>`<div class="quick-btn" onclick="quickQ('${q}')">${q}</div>`).join("")}
+  </div>
+  <div class="ai-chat">
+    <div class="ai-messages" id="ai-msgs">
+      ${S.aiMsgs.length === 0
+        ? `<div class="ai-msg bot">Olá, Dra. Natalia! 👋<br><br>Sou sua consultora nutricional IA especializada em nutrição clínica funcional. Posso ajudá-la com:<br><br>• Melhores alimentos terapêuticos para cada patologia<br>• Mecanismos de ação bioquímicos dos nutrientes<br>• Fitoterapia e nutraceuticos com evidências<br>• Estratégias nutricionais baseadas em evidências<br><br>Selecione uma patologia ao lado ou faça sua pergunta.</div>`
+        : S.aiMsgs.map(m => `<div class="ai-msg ${m.r}">${m.t.replace(/\n/g,"<br>").replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>")}</div>`).join("")}
+      ${S.aiLoad ? `<div class="ai-msg loading">⏳ Consultando base de dados nutricional clínica...</div>` : ""}
+    </div>
+    <div class="ai-footer">
+      <input class="ai-input" id="aiinp" placeholder="Ex: Melhores alimentos para depressão com mecanismo de ação..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}">
+      <button class="btn btn-primary" onclick="sendAI()">Enviar ↵</button>
+    </div>
+  </div>
+</div>
+</div>`;
+}
+
+// ─── MODAL ───────────────────────────────────────────────
+function rModal(eid) {
+  const ep = eid ? PATS.find(p => p.id === eid) : null;
+  const d = ep || {n:"",g:"F",age:"",w:"",h:"",bf:"",act:"moderado",goal:"deficit",conds:[],notes:""};
+  return `<div class="modal-overlay" onclick="if(event.target===this)closeM()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="modal-title">${ep ? "Editar paciente" : "Novo paciente"}</div>
+      <div class="modal-sub">${ep ? `${ep.n} · Cadastrado em ${ep.dt}` : "Preencha os dados · A calculadora IIFYM sugerirá os macros"}</div>
+    </div>
+    <div class="modal-body">
+      <div class="frow">
+        <div class="field"><label>Nome completo *</label><input id="fn" value="${d.n}" placeholder="Nome completo do paciente"></div>
+        <div class="field"><label>Gênero *</label><select id="fg"><option value="F" ${d.g==="F"?"selected":""}>Feminino</option><option value="M" ${d.g==="M"?"selected":""}>Masculino</option></select></div>
+      </div>
+      <div class="frow three">
+        <div class="field"><label>Idade (anos) *</label><input type="number" id="fa" value="${d.age}" placeholder="Ex: 32" min="1" max="120"></div>
+        <div class="field"><label>Peso atual (kg) *</label><input type="number" id="fw" value="${d.w}" step="0.1" placeholder="Ex: 70.5"></div>
+        <div class="field"><label>Altura (cm) *</label><input type="number" id="fh" value="${d.h}" placeholder="Ex: 165"></div>
+      </div>
+      <div class="frow">
+        <div class="field">
+          <label>% Gordura corporal <small style="text-transform:none;font-weight:400">(opcional — ativa Katch-McArdle)</small></label>
+          <input type="number" id="fbf" value="${d.bf||""}" step="0.1" placeholder="Ex: 25.5 · deixe vazio para Mifflin-St Jeor" min="3" max="60">
+        </div>
+        <div class="field"><label>Nível de atividade física *</label>
+          <select id="fact">
+            <option value="sedentario" ${d.act==="sedentario"?"selected":""}>Sedentário (nenhum exercício)</option>
+            <option value="leve" ${d.act==="leve"?"selected":""}>Leve (1-3×/semana)</option>
+            <option value="moderado" ${d.act==="moderado"?"selected":""}>Moderado (3-5×/semana)</option>
+            <option value="ativo" ${d.act==="ativo"?"selected":""}>Ativo (6-7×/semana)</option>
+            <option value="muito_ativo" ${d.act==="muito_ativo"?"selected":""}>Muito ativo (2× ao dia)</option>
+          </select>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="field"><label>Objetivo *</label>
+          <select id="fgoal">
+            <option value="deficit" ${d.goal==="deficit"?"selected":""}>Perda de peso (déficit −500 kcal)</option>
+            <option value="manutencao" ${d.goal==="manutencao"?"selected":""}>Manutenção do peso</option>
+            <option value="surplus" ${d.goal==="surplus"?"selected":""}>Ganho de massa (+300 kcal)</option>
+          </select>
+        </div>
+        <div class="field"><label>Condições / Patologias</label>
+          <input id="fconds" value="${(d.conds||[]).join(", ")}" placeholder="Ex: Hipertensão, Ansiedade, Depressão">
+        </div>
+      </div>
+      <div class="frow full">
+        <div class="field"><label>Observações clínicas</label>
+          <textarea id="fnotes" placeholder="Preferências alimentares, alergias, intolerâncias, estilo de vida...">${d.notes||""}</textarea>
+        </div>
+      </div>
+      <button onclick="calcPrev()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r);background:var(--cream);font-family:inherit;font-size:13px;cursor:pointer;color:var(--ink);margin-bottom:12px;font-weight:500;transition:background .15s" onmouseover="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--mint-lt')" onmouseout="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--cream')">
+        🧮 Calcular IIFYM — preview dos macros sugeridos
+      </button>
+      <div id="iprev" style="display:none">
+        <div class="iifym-box">
+          <div class="iifym-title">Sugestão de macros — IIFYM</div>
+          <div class="iifym-grid" id="ivals"></div>
+          <div class="iifym-sub" id="imet"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      ${ep ? `<button class="btn btn-danger" onclick="delPat(${ep.id})" style="margin-right:auto">🗑 Excluir paciente</button>` : ""}
+      <button class="btn btn-secondary" onclick="closeM()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveP(${ep?ep.id:"null"})">${ep ? "✅ Salvar alterações" : "✅ Cadastrar paciente"}</button>
+    </div>
+  </div>
+</div>`;
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────
+function calcPrev() {
+  const age = parseInt(document.getElementById("fa").value)||0;
+  const w = parseFloat(document.getElementById("fw").value)||0;
+  const h = parseFloat(document.getElementById("fh").value)||0;
+  if (!age||!w||!h) { alert("Preencha idade, peso e altura para calcular."); return; }
+  const r = iifym({age,w,h,bf:parseFloat(document.getElementById("fbf").value)||null,g:document.getElementById("fg").value,act:document.getElementById("fact").value,goal:document.getElementById("fgoal").value});
+  document.getElementById("iprev").style.display = "block";
+  document.getElementById("ivals").innerHTML = `
+    <div><div class="iifym-val">${r.kcal}</div><div class="iifym-lbl">kcal/dia</div></div>
+    <div><div class="iifym-val">${r.cb}g</div><div class="iifym-lbl">Carbos</div></div>
+    <div><div class="iifym-val">${r.pr}g</div><div class="iifym-lbl">Proteína</div></div>
+    <div><div class="iifym-val">${r.ft}g</div><div class="iifym-lbl">Lipídios</div></div>
+    <div><div class="iifym-val">${r.tdee}</div><div class="iifym-lbl">TDEE</div></div>`;
+  document.getElementById("imet").textContent = `${r.met} · BMR: ${r.bmr} kcal · Proteína: 2g/kg LMM · Lipídios: 0.9g/kg peso · Carbos: calorias restantes ÷ 4`;
+}
+
+function saveP(eid) {
+  const n = document.getElementById("fn").value.trim();
+  const age = parseInt(document.getElementById("fa").value)||0;
+  const w = parseFloat(document.getElementById("fw").value)||0;
+  const h = parseFloat(document.getElementById("fh").value)||0;
+  if (!n||!age||!w||!h) { alert("Preencha os campos obrigatórios (*)."); return; }
+  const bf = parseFloat(document.getElementById("fbf").value)||null;
+  const conds = document.getElementById("fconds").value.split(",").map(s=>s.trim()).filter(Boolean);
+  const COLS = [["#3D6B52","#E8F5EE"],["#1E4D7B","#E3EFF8"],["#993C1D","#FAECE7"],["#7A5000","#FDF3E0"],["#4A2580","#F0E8FF"]];
+  if (eid && eid !== "null") {
+    const idx = PATS.findIndex(p => p.id === eid);
+    if (idx !== -1) Object.assign(PATS[idx], {n,age,w,h,bf,g:document.getElementById("fg").value,act:document.getElementById("fact").value,goal:document.getElementById("fgoal").value,conds,notes:document.getElementById("fnotes").value.trim(),in:n.split(" ").slice(0,2).map(x=>x[0]).join("")});
+  } else {
+    const ci = PATS.length % COLS.length;
+    PATS.push({id:Date.now(),n,age,w,h,bf,g:document.getElementById("fg").value,act:document.getElementById("fact").value,goal:document.getElementById("fgoal").value,conds,notes:document.getElementById("fnotes").value.trim(),in:n.split(" ").slice(0,2).map(x=>x[0]).join(""),cl:COLS[ci][0],bg:COLS[ci][1],adh:0,plan:{},dt:new Date().toLocaleDateString("pt-BR",{month:"short",year:"numeric"})});
+  }
+  closeM(); rp();
+}
+
+function delPat(id) {
+  if (!confirm("Excluir este paciente? Todos os dados do plano serão removidos. Não é reversível.")) return;
+  PATS = PATS.filter(p => p.id !== id);
+  S.selPat = PATS[0];
+  closeM(); rp();
+}
+
+function selFood(id) { S.tsel = id; rp(); setTimeout(() => { const el = document.getElementById("qinp"); if (el) { el.focus(); el.select(); } }, 40); }
+
+function addFood() {
+  const q = parseFloat(document.getElementById("qinp").value) || 100;
+  const food = TACO.find(f => f.id === S.tsel);
+  if (!food) return;
+  if (!S.selPat.plan[S.mealTab]) S.selPat.plan[S.mealTab] = [];
+  S.selPat.plan[S.mealTab].push({food, q});
+  S.tsel = null; rp();
+}
+
+function delItem(meal, idx) { S.selPat.plan[meal].splice(idx, 1); rp(); }
+
+function savePlan() {
+  const t = planTotals(S.selPat.plan);
+  const ii = iifym(S.selPat);
+  alert(`✅ Plano alimentar de ${S.selPat.n} salvo!\n\nTotal: ${t.cal} kcal · P:${t.pr}g C:${t.c}g L:${t.f}g\nMeta: ${ii.kcal} kcal\nSaldo: ${t.cal - ii.kcal > 0 ? "+" : ""}${t.cal - ii.kcal} kcal\n\nEnviado ao app do paciente com sucesso.`);
+}
+
+function selPat(id) { S.selPat = PATS.find(p => p.id == id) || S.selPat; S.tsel = null; rp(); }
+
+function openMsg(id) { const m = MSGS.find(x => x.id === id); if (m) m.ur = false; S.selMsg = id; updBadge(); rp(); }
+function goMsg(id) { S.pg = "msgs"; openMsg(id); }
+function goPlano(pid) { S.pg = "plano"; S.selPat = PATS.find(p => p.id === pid) || S.selPat; closeM(); rp(); }
+
+function sendReply(mid) {
+  const ta = document.getElementById("rpta");
+  if (!ta || !ta.value.trim()) { alert("Escreva uma resposta antes de enviar."); return; }
+  alert(`✅ Resposta enviada para ${MSGS.find(m=>m.id===mid)?.pn}!`);
+  ta.value = "";
+}
+
+function openAdd() { document.getElementById("mroot").innerHTML = rModal(null); }
+function openEdit(id) { document.getElementById("mroot").innerHTML = rModal(id); closeM_and_open(id); }
+function closeM_and_open(id) { document.getElementById("mroot").innerHTML = rModal(id); }
+function openEdit(id) { document.getElementById("mroot").innerHTML = rModal(id); }
+function closeM() { document.getElementById("mroot").innerHTML = ""; }
+
+// ─── IA ──────────────────────────────────────────────────
+async function sendAI() {
+  const inp = document.getElementById("aiinp");
+  const txt = inp ? inp.value.trim() : "";
+  if (!txt || S.aiLoad) return;
+  inp.value = "";
+  S.aiMsgs.push({r:"user", t:txt});
+  S.aiLoad = true; rp(); scrollAI();
+  try {
+    const res = await fetch("/api/ai/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "claude-opus-4-5",
+        max_tokens: 1024,
+        system: "Você é uma especialista em nutrição clínica funcional e medicina integrativa com PhD. Responda perguntas de uma nutricionista de forma técnica, baseada em evidências recentes, clara e objetiva. Para alimentos terapêuticos, sempre inclua: 1) Por que é indicado para a condição, 2) Compostos bioativos e mecanismo de ação bioquímico específico, 3) Quantidade/forma de consumo sugerida com justificativa. Use termos científicos corretos. Máximo 300 palavras por resposta. Estruture bem a resposta.",
+        messages: S.aiMsgs.map(m => ({role: m.r === "user" ? "user" : "assistant", content: m.t}))
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+    const d = await res.json();
+    S.aiMsgs.push({r:"bot", t: d.content.map(b => b.text || "").join("")});
+  } catch(e) {
+    S.aiMsgs.push({r:"bot", t:`❌ Erro: ${e.message}\n\nA integração de IA é feita pelo backend para não expor chaves no navegador.`});
+  }
+  S.aiLoad = false; rp(); scrollAI();
+}
+
+function selPatho(pt) {
+  S.aiPatho = pt;
+  if (S.pg !== "ia") { S.pg = "ia"; }
+  S.aiMsgs.push({r:"user", t:`Quais são os melhores alimentos terapêuticos para ${pt}? Explique o mecanismo de ação bioquímico de cada um.`});
+  S.aiLoad = true; rp(); scrollAI();
+  fetch("/api/ai/messages", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({model:"claude-opus-4-5",max_tokens:1024,system:"Especialista em nutrição clínica funcional. Para cada alimento: nome em negrito → composto ativo → mecanismo de ação bioquímico → quantidade sugerida com base em evidências. Técnico e objetivo para nutricionista. Máx 300 palavras.",messages:[{role:"user",content:`Melhores alimentos terapêuticos para ${pt}: liste os principais com compostos ativos e mecanismos de ação bioquímicos detalhados.`}]})
+  })
+  .then(r => { if (!r.ok) return r.json().then(e => { throw new Error(e.error?.message||`HTTP ${r.status}`); }); return r.json(); })
+  .then(d => { S.aiMsgs.push({r:"bot", t: d.content.map(b=>b.text||"").join("")}); S.aiLoad = false; rp(); scrollAI(); })
+  .catch(e => { S.aiMsgs.push({r:"bot", t:`❌ Erro: ${e.message}`}); S.aiLoad = false; rp(); });
+}
+
+function quickQ(q) {
+  if (S.pg !== "ia") { S.pg = "ia"; rp(); }
+  setTimeout(() => { const inp = document.getElementById("aiinp"); if (inp) { inp.value = q; inp.focus(); } }, 100);
+}
+
+function scrollAI() { setTimeout(() => { const el = document.getElementById("ai-msgs"); if (el) el.scrollTop = el.scrollHeight; }, 60); }
+
+// ─── ROUTER ──────────────────────────────────────────────
+const TITLES = {dash:"Dashboard", pac:"Pacientes", plano:"Plano Alimentar", msgs:"Mensagens", rel:"Relatórios", ia:"IA Consultora Nutricional"};
+
+function rp() {
+  const pages = {dash:rDash, pac:rPac, plano:rPlano, msgs:rMsgs, rel:rRel, ia:rIA};
+  const c = document.getElementById("content");
+  if (c) c.innerHTML = (pages[S.pg] || rDash)();
+
+  document.querySelectorAll(".si").forEach(b => b.classList.toggle("on", b.dataset.p === S.pg));
+  const t = document.getElementById("ptitle");
+  if (t) t.textContent = TITLES[S.pg] || "";
+
+  const ac = document.getElementById("tactions");
+  if (ac) {
+    if (S.pg === "dash" || S.pg === "pac") {
+      ac.innerHTML = `<button class="btn btn-secondary btn-sm" onclick="openAdd()">👤 Novo paciente</button>`;
+    } else if (S.pg === "plano") {
+      ac.innerHTML = `<button class="btn btn-secondary btn-sm" onclick="S.selPat.plan={};rp()">🗑 Limpar plano</button> <button class="btn btn-primary btn-sm" onclick="savePlan()">💾 Salvar plano</button>`;
+    } else if (S.pg === "ia") {
+      ac.innerHTML = `<button class="btn btn-secondary btn-sm" onclick="S.aiMsgs=[];S.aiPatho='';rp()">🗑 Limpar conversa</button>`;
+    } else {
+      ac.innerHTML = "";
+    }
+  }
+  updBadge();
+}
+
+document.querySelectorAll(".si").forEach(b => { b.onclick = () => { S.pg = b.dataset.p; rp(); }; });
+function logout() { window.location.href = "/"; }
+rp();
+</script>
+</body>
+</html>

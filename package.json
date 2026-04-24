@@ -1,0 +1,15 @@
+{
+  "name": "nutriapp-secure-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "NutriApp exportado com servidor local seguro, proxy server-side de IA e artefatos visuais preservados.",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "security:check": "node scripts/security-check.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

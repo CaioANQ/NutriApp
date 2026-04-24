@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriApp — Plataforma de Nutrição Personalizada</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest:#0A2316;--sage:#2D5A3D;--sage2:#4A8060;--mint:#9FCFB4;--mint-lt:#E4F3EA;
+  --cream:#F5F1EA;--warm:#FAFAF7;--ink:#111714;--ink2:#2A3D30;--muted:#6A8272;
+  --terra:#B55E3A;--terra-lt:#F5EBE4;--gold:#C49A3C;--gold-lt:#FBF3E0;
+  --blue:#1A4F82;--blue-lt:#E3EEF7;--red:#B83232;--red-lt:#FAEAEA;
+  --border:rgba(10,35,22,.1);--sh:0 2px 16px rgba(10,35,22,.07);--sh2:0 6px 32px rgba(10,35,22,.12);
+  --r:10px;--r2:16px;--r3:22px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-font-smoothing:antialiased;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);overflow:hidden;}
+input,select,textarea,button{font-family:'DM Sans',sans-serif;}
+
+/* ── LAYOUT ── */
+#root{display:flex;height:100vh;overflow:hidden;}
+
+/* ── LOGIN ── */
+.login-wrap{display:flex;width:100%;height:100%;}
+.login-left{width:420px;flex-shrink:0;background:var(--forest);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:48px;position:relative;overflow:hidden;}
+.login-left::before{content:'';position:absolute;top:-120px;right:-100px;width:380px;height:380px;border-radius:50%;background:rgba(159,207,180,.06);}
+.login-left::after{content:'';position:absolute;bottom:-80px;left:-60px;width:260px;height:260px;border-radius:50%;background:rgba(159,207,180,.04);}
+.ll-brand{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:500;color:#fff;letter-spacing:-.5px;margin-bottom:8px;position:relative;z-index:1;}
+.ll-brand em{color:var(--mint);font-style:normal;}
+.ll-sub{font-size:13px;color:rgba(255,255,255,.4);letter-spacing:.3px;margin-bottom:60px;position:relative;z-index:1;}
+.ll-feat{position:relative;z-index:1;width:100%;}
+.ll-feat-item{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.ll-feat-icon{width:36px;height:36px;border-radius:10px;background:rgba(159,207,180,.12);border:1px solid rgba(159,207,180,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.ll-feat-text{font-size:13px;color:rgba(255,255,255,.55);line-height:1.5;}
+.login-right{flex:1;display:flex;align-items:center;justify-content:center;background:var(--cream);padding:48px;}
+.login-card{width:100%;max-width:380px;}
+.lc-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:500;color:var(--ink);margin-bottom:6px;}
+.lc-sub{font-size:13px;color:var(--muted);margin-bottom:32px;line-height:1.6;}
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;}
+.field input,.field select{width:100%;padding:11px 14px;border-radius:var(--r);border:1px solid var(--border);background:#fff;font-size:14px;color:var(--ink);outline:none;transition:border-color .15s;}
+.field input:focus,.field select:focus{border-color:var(--sage2);box-shadow:0 0 0 3px rgba(74,128,96,.1);}
+.demo-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.demo-pill{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;font-size:12px;color:var(--muted);cursor:pointer;transition:all .15s;}
+.demo-pill:hover,.demo-pill.sel{background:var(--mint-lt);border-color:var(--sage2);color:var(--sage);}
+.btn-login{width:100%;padding:13px;background:var(--forest);color:#fff;border:none;border-radius:var(--r2);font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;letter-spacing:.2px;}
+.btn-login:hover{background:var(--sage);transform:translateY(-1px);}
+.login-lgpd{font-size:11px;color:var(--muted);text-align:center;margin-top:20px;line-height:1.6;}
+.err-box{background:var(--red-lt);border:1px solid rgba(184,50,50,.2);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:16px;}
+
+/* ── APP SHELL ── */
+.shell{display:none;width:100%;height:100vh;}
+.shell.show{display:flex;}
+
+/* ── SIDEBAR ── */
+.sb{width:210px;background:var(--forest);display:flex;flex-direction:column;flex-shrink:0;}
+.sb-brand{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,.06);}
+.sb-logo{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:500;color:#fff;}
+.sb-logo em{color:var(--mint);font-style:normal;}
+.sb-badge{font-size:9px;font-weight:600;letter-spacing:.8px;color:var(--mint);background:rgba(159,207,180,.12);padding:2px 8px;border-radius:20px;display:inline-block;margin-top:5px;text-transform:uppercase;}
+.sb-user{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;}
+.sb-av{width:34px;height:34px;border-radius:50%;background:var(--sage);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0;}
+.sb-uname{font-size:13px;color:#fff;font-weight:500;}
+.sb-urole{font-size:10px;color:rgba(255,255,255,.35);}
+.sb-nav{flex:1;padding:10px 0;overflow-y:auto;}
+.si{display:flex;align-items:center;gap:11px;padding:10px 20px;cursor:pointer;border-left:2px solid transparent;transition:all .12s;text-decoration:none;}
+.si:hover{background:rgba(255,255,255,.05);}
+.si.on{background:rgba(159,207,180,.08);border-left-color:var(--mint);}
+.si-ic{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.si-lb{font-size:13px;color:rgba(255,255,255,.45);flex:1;}
+.si.on .si-lb{color:#fff;font-weight:500;}
+.si-ct{background:var(--terra);color:#fff;font-size:9px;padding:1px 6px;border-radius:8px;font-weight:700;}
+.sb-foot{padding:14px 20px;border-top:1px solid rgba(255,255,255,.06);font-size:10px;color:rgba(255,255,255,.2);line-height:1.7;}
+.sb-logout{width:100%;margin:0 0 10px;padding:9px 10px;border-radius:var(--r);border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:rgba(255,255,255,.58);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .15s;}
+.sb-logout:hover{background:rgba(184,222,202,.10);border-color:rgba(184,222,202,.22);color:#fff;}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 0 var(--border);}
+.tb-title{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--ink);font-weight:500;}
+.tb-right{display:flex;align-items:center;gap:8px;}
+.tb-btn{padding:8px 16px;border-radius:var(--r);border:1px solid var(--border);background:#fff;font-size:12px;font-weight:500;cursor:pointer;color:var(--muted);transition:all .15s;}
+.tb-btn:hover{background:var(--mint-lt);border-color:var(--mint);color:var(--sage);}
+.tb-btn.primary{background:var(--forest);color:#fff;border-color:var(--forest);}
+.tb-btn.primary:hover{background:var(--sage);}
+.content{flex:1;overflow-y:auto;padding:24px;}
+.content::-webkit-scrollbar{width:4px;}
+.content::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* ── PAGES ── */
+.page{display:none;animation:pi .2s ease;}
+.page.show{display:block;}
+@keyframes pi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── GRID / CARD ── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{background:#fff;border-radius:var(--r2);border:1px solid var(--border);padding:18px;box-shadow:var(--sh);transition:transform .2s;}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--sh2);}
+.stat-ic{font-size:22px;margin-bottom:10px;display:block;}
+.stat-v{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:500;color:var(--ink);margin-bottom:3px;}
+.stat-l{font-size:12px;color:var(--muted);}
+.stat-t{font-size:11px;margin-top:6px;font-weight:500;}
+.up{color:#2D8050;}.dn{color:#B83232;}
+.card{background:#fff;border-radius:var(--r2);border:1px solid var(--border);padding:20px;box-shadow:var(--sh);margin-bottom:14px;}
+.sec{font-family:'Cormorant Garamond',serif;font-size:17px;color:var(--ink);margin-bottom:12px;font-weight:500;}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+
+/* ── ADHERE ── */
+.adh-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.adh-name{font-size:12px;color:var(--ink);width:100px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.adh-bar{flex:1;height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+.adh-fill{height:100%;border-radius:3px;transition:width .6s;}
+.adh-pct{font-size:11px;font-weight:600;color:var(--ink);width:32px;text-align:right;}
+
+/* ── PATIENT GRID ── */
+.pat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:16px;}
+.pat-card{background:#fff;border-radius:var(--r2);border:1px solid var(--border);padding:18px;cursor:pointer;transition:all .2s;box-shadow:var(--sh);}
+.pat-card:hover{border-color:var(--sage2);transform:translateY(-2px);box-shadow:var(--sh2);}
+.pat-card.new{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;border:2px dashed var(--border);box-shadow:none;}
+.pat-card.new:hover{background:var(--mint-lt);border-color:var(--mint);}
+.pat-av{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;margin-bottom:12px;}
+.pat-name{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.pat-meta{font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.6;}
+.cond{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--mint-lt);color:var(--sage);font-weight:500;display:inline-block;margin:2px 2px 0 0;}
+.tag{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:inline-block;}
+.tg{background:var(--mint-lt);color:var(--sage);}
+.ta{background:var(--gold-lt);color:#7A5000;}
+.tr{background:var(--red-lt);color:var(--red);}
+.tb{background:var(--blue-lt);color:var(--blue);}
+
+/* ── MEAL BUILDER ── */
+.builder{display:grid;grid-template-columns:1fr 1fr;gap:16px;height:460px;}
+.panel{background:#fff;border-radius:var(--r2);border:1px solid var(--border);padding:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--sh);}
+.srch{width:100%;padding:9px 12px;border-radius:var(--r);border:1px solid var(--border);font-size:13px;color:var(--ink);outline:none;margin-bottom:10px;background:var(--cream);transition:border-color .15s;}
+.srch:focus{border-color:var(--sage2);background:#fff;}
+.tlist{flex:1;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r);}
+.tlist::-webkit-scrollbar{width:3px;}
+.tlist::-webkit-scrollbar-thumb{background:var(--border);}
+.ti{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .12s;}
+.ti:last-child{border-bottom:none;}
+.ti:hover{background:var(--mint-lt);}
+.ti-n{font-size:13px;color:var(--ink);font-weight:500;}
+.ti-m{font-size:10px;color:var(--muted);margin-top:1px;}
+.ti-c{font-size:12px;font-weight:600;color:var(--sage);white-space:nowrap;}
+.add-form{background:var(--mint-lt);border-radius:var(--r);padding:12px;margin-top:10px;border:1px solid var(--mint);}
+.qty-row{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;}
+.qty-inp{width:80px;padding:8px;border-radius:var(--r);border:1px solid var(--mint);font-size:13px;text-align:center;outline:none;background:#fff;color:var(--ink);}
+.qty-inp:focus{border-color:var(--sage2);}
+.meal-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;}
+.mt{padding:5px 11px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:#fff;transition:all .12s;}
+.mt.on{background:var(--forest);color:#fff;border-color:var(--forest);}
+.plan-list{flex:1;overflow-y:auto;}
+.plan-item{display:flex;justify-content:space-between;align-items:center;padding:9px 6px;border-bottom:1px solid var(--border);}
+.plan-item:last-child{border-bottom:none;}
+.pi-name{font-size:13px;color:var(--ink);font-weight:500;}
+.pi-meta{font-size:10px;color:var(--muted);margin-top:1px;}
+.pi-kcal{font-size:12px;font-weight:600;color:var(--sage);}
+.pi-del{font-size:14px;cursor:pointer;color:var(--terra);padding:2px 6px;border-radius:5px;}
+.pi-del:hover{background:var(--terra-lt);}
+.plan-tots{background:var(--mint-lt);border-radius:var(--r);padding:12px;margin-top:10px;border:1px solid var(--mint);}
+.pt-grid{display:grid;grid-template-columns:repeat(5,1fr);text-align:center;margin-bottom:6px;}
+.pt-v{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:500;color:var(--forest);}
+.pt-l{font-size:10px;color:var(--muted);margin-top:1px;}
+.empty-st{text-align:center;padding:30px;color:var(--muted);font-size:13px;}
+
+/* ── FEEDBACK ── */
+.fb-layout{display:grid;grid-template-columns:360px 1fr;gap:18px;}
+.fb-item{background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:12px 14px;cursor:pointer;margin-bottom:8px;border-left:3px solid transparent;transition:all .15s;box-shadow:var(--sh);}
+.fb-item:hover{transform:translateX(2px);}
+.fb-item.ur{border-left-color:var(--sage);}
+.fb-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.fb-sender{font-size:13px;font-weight:600;color:var(--ink);}
+.fb-time{font-size:10px;color:var(--muted);}
+.fb-preview{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fb-detail{background:#fff;border-radius:var(--r2);border:1px solid var(--border);padding:18px;box-shadow:var(--sh);}
+.resp-ta{width:100%;padding:10px 12px;border-radius:var(--r);border:1px solid var(--border);font-size:13px;resize:none;height:80px;outline:none;background:var(--cream);color:var(--ink);line-height:1.6;}
+.resp-ta:focus{border-color:var(--sage2);background:#fff;}
+
+/* ── REPORTS ── */
+.rel-filter{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.rel-search{flex:1;min-width:200px;padding:8px 12px;border-radius:var(--r);border:1px solid var(--border);font-size:13px;background:#fff;color:var(--ink);outline:none;}
+.rel-search:focus{border-color:var(--sage2);}
+.pat-opt{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);cursor:pointer;border:1px solid var(--border);margin-bottom:6px;background:#fff;transition:all .15s;}
+.pat-opt:hover,.pat-opt.sel{border-color:var(--sage2);background:var(--mint-lt);}
+.pat-av-sm{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:90px;margin-top:10px;}
+.bc-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bc-bar{width:100%;border-radius:4px 4px 0 0;}
+.bc-lbl{font-size:9px;color:var(--muted);}
+.bc-val{font-size:9px;font-weight:600;color:#2D8050;}
+.donut-wrap{display:flex;align-items:center;gap:20px;}
+.pie-leg{display:flex;flex-direction:column;gap:8px;}
+.pie-li{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);}
+.pie-dot{width:11px;height:11px;border-radius:3px;flex-shrink:0;}
+.iifym-box{background:var(--forest);border-radius:var(--r2);padding:18px;margin-top:14px;}
+.ii-title{font-size:10px;color:var(--mint);letter-spacing:.7px;text-transform:uppercase;margin-bottom:12px;font-weight:600;}
+.ii-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:8px;}
+.ii-v{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:#fff;text-align:center;}
+.ii-l{font-size:10px;color:rgba(255,255,255,.4);text-align:center;margin-top:2px;}
+.ii-sub{font-size:11px;color:rgba(159,207,180,.6);margin-top:6px;line-height:1.6;}
+
+/* ── AI ── */
+.ai-lay{display:grid;grid-template-columns:260px 1fr;gap:16px;height:500px;}
+.ai-sb{background:#fff;border-radius:var(--r2);border:1px solid var(--border);padding:16px;overflow-y:auto;box-shadow:var(--sh);}
+.ai-sb::-webkit-scrollbar{width:3px;}
+.ai-chat{background:#fff;border-radius:var(--r2);border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--sh);}
+.ai-msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;}
+.ai-msgs::-webkit-scrollbar{width:3px;}
+.ai-msg{max-width:84%;padding:12px 15px;border-radius:12px;font-size:13px;line-height:1.75;}
+.ai-msg.u{background:var(--forest);color:#fff;align-self:flex-end;border-radius:12px 12px 2px 12px;}
+.ai-msg.b{background:var(--mint-lt);color:var(--ink2);align-self:flex-start;border-radius:12px 12px 12px 2px;border:1px solid var(--mint);}
+.ai-msg.ld{background:var(--cream);color:var(--muted);font-style:italic;}
+.ai-foot{padding:14px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--warm);}
+.ai-inp{flex:1;padding:10px 14px;border-radius:var(--r);border:1px solid var(--border);font-size:13px;color:var(--ink);background:#fff;outline:none;}
+.ai-inp:focus{border-color:var(--sage2);}
+.pchip{display:block;padding:7px 12px;border-radius:10px;font-size:12px;cursor:pointer;border:1px solid var(--border);color:var(--muted);background:var(--warm);margin-bottom:6px;transition:all .12s;}
+.pchip:hover{background:var(--mint-lt);border-color:var(--mint);color:var(--sage);}
+.pchip.on{background:var(--mint-lt);border-color:var(--sage2);color:var(--forest);font-weight:600;}
+.qlink{display:block;padding:8px 10px;border-radius:var(--r);font-size:12px;color:var(--muted);cursor:pointer;border:1px solid var(--border);margin-bottom:5px;transition:background .12s;}
+.qlink:hover{background:var(--mint-lt);border-color:var(--mint);}
+
+/* ── PATIENT APP (side panel) ── */
+.patient-shell{display:none;width:100%;height:100vh;}
+.patient-shell.show{display:flex;flex-direction:column;}
+.ph-status{background:var(--forest);padding:9px 18px 6px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.ph-status-time{font-size:13px;font-weight:500;color:#fff;}
+.ph-header{background:var(--forest);padding:6px 18px 16px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.ph-brand{font-family:'Cormorant Garamond',serif;font-size:22px;color:#fff;font-weight:500;}
+.ph-brand em{color:var(--mint);font-style:normal;}
+.ph-user{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:5px 12px;display:flex;align-items:center;gap:7px;}
+.ph-dot{width:7px;height:7px;border-radius:50%;background:var(--mint);}
+.ph-uname{font-size:12px;color:#fff;font-weight:500;}
+.ph-scroll{flex:1;overflow-y:auto;padding:14px;background:var(--cream);}
+.ph-scroll::-webkit-scrollbar{width:3px;}
+.ph-nav{background:#fff;border-top:1px solid var(--border);display:flex;flex-shrink:0;}
+.pn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 2px 11px;border:none;background:none;cursor:pointer;border-top:2px solid transparent;font-family:'DM Sans',sans-serif;}
+.pn.on{border-top-color:var(--forest);}
+.pn-ic{font-size:18px;}
+.pn-lb{font-size:9px;color:var(--muted);}
+.pn.on .pn-lb{color:var(--forest);font-weight:500;}
+
+/* Patient content */
+.hero-card{background:var(--forest);border-radius:var(--r2);padding:16px;margin-bottom:10px;position:relative;overflow:hidden;}
+.hero-card::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:rgba(159,207,180,.07);}
+.hero-row{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;}
+.hero-greet{font-size:11px;color:var(--mint);margin-bottom:3px;}
+.hero-cal{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:500;color:#fff;line-height:1;}
+.hero-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:2px;}
+.ring-w{width:76px;height:76px;position:relative;}
+.ring-svg{transform:rotate(-90deg);}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-pct{font-size:14px;font-weight:600;color:#fff;}
+.ring-lbl{font-size:9px;color:var(--mint);}
+.macro-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
+.mc{background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:9px 7px;text-align:center;}
+.mc-v{font-size:15px;font-weight:600;}
+.mc-l{font-size:9px;color:var(--muted);}
+.mc-bar{height:3px;background:var(--border);border-radius:2px;margin-top:5px;overflow:hidden;}
+.mc-fill{height:100%;border-radius:2px;}
+.p-card{background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:13px;margin-bottom:8px;}
+.p-card-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.food-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border);}
+.food-row:last-child{border-bottom:none;}
+.fchk{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--mint);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .15s;}
+.fchk.on{background:var(--forest);border-color:var(--forest);color:#fff;}
+.fname{font-size:13px;color:var(--ink);flex:1;}
+.fqty{font-size:10px;color:var(--muted);}
+.fkcal{font-size:12px;font-weight:600;color:var(--sage);}
+.water-card{background:#EEF5FB;border-radius:var(--r);padding:12px;margin-bottom:10px;border:1px solid #C8DFF2;}
+.water-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.water-title{font-size:13px;font-weight:500;color:#1A5C9A;}
+.water-ct{font-size:11px;color:#1A5C9A;opacity:.7;}
+.glasses{display:flex;flex-wrap:wrap;gap:6px;}
+.glass{width:30px;height:36px;border-radius:4px 4px 6px 6px;border:1.5px solid #B8D4EE;background:#fff;cursor:pointer;display:flex;align-items:flex-end;overflow:hidden;}
+.glass.on{border-color:#1A5C9A;}
+.glass-fill{width:100%;background:#3B8ED4;transition:height .25s;}
+.diary-card{background:#fff;border-radius:var(--r);border:1px solid var(--border);padding:14px;margin-bottom:10px;}
+.diary-notice{background:var(--gold-lt);border-radius:var(--r);border:1px solid rgba(196,154,60,.2);padding:10px 12px;font-size:11px;color:#633806;margin-bottom:12px;line-height:1.6;}
+.diary-emojis{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.d-emoji{font-size:22px;cursor:pointer;padding:5px;border-radius:var(--r);border:1.5px solid transparent;transition:all .15s;line-height:1;}
+.d-emoji.sel{border-color:var(--sage);background:var(--mint-lt);}
+.d-ta{width:100%;padding:9px 11px;border-radius:var(--r);border:1px solid var(--border);font-size:12px;color:var(--ink);resize:none;height:75px;outline:none;background:var(--cream);line-height:1.5;}
+.d-ta:focus{border-color:var(--sage2);background:#fff;}
+.d-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+.d-chars{font-size:10px;color:var(--muted);}
+.d-chars.warn{color:var(--gold);}
+.d-save{padding:7px 16px;background:var(--forest);color:#fff;border:none;border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;}
+.d-save:disabled{opacity:.5;cursor:not-allowed;}
+.diary-saved{background:var(--mint-lt);border-radius:var(--r);padding:12px;font-size:12px;color:var(--sage);line-height:1.7;}
+.no-comm{font-size:10px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--border);line-height:1.5;}
+.btn-sm{padding:7px 16px;border-radius:var(--r);border:1px solid var(--border);font-size:12px;font-weight:500;cursor:pointer;background:#fff;color:var(--muted);transition:all .15s;}
+.btn-sm:hover{background:var(--mint-lt);border-color:var(--mint);color:var(--sage);}
+.btn-sm.primary{background:var(--forest);color:#fff;border-color:var(--forest);}
+.btn-sm.primary:hover{background:var(--sage);}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.modal-bg.show{display:flex;}
+.modal{background:#fff;border-radius:var(--r3);width:100%;max-width:540px;max-height:88vh;overflow-y:auto;}
+.modal::-webkit-scrollbar{width:4px;}
+.modal-head{padding:22px 24px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:1;}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--ink);font-weight:500;}
+.modal-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.modal-body{padding:20px 24px;}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:#fff;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.frow.full{grid-template-columns:1fr;}
+.frow.three{grid-template-columns:1fr 1fr 1fr;}
+.fl{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
+.fi{width:100%;padding:9px 12px;border-radius:var(--r);border:1px solid var(--border);font-size:13px;color:var(--ink);background:#fff;outline:none;transition:border-color .15s;}
+.fi:focus{border-color:var(--sage2);box-shadow:0 0 0 3px rgba(74,128,96,.08);}
+textarea.fi{resize:vertical;min-height:65px;line-height:1.6;}
+select.fi{-webkit-appearance:none;cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="root">
+
+<!-- ═══════════════════════════════ LOGIN ═══════════════════════════════ -->
+<div class="login-wrap" id="login-screen">
+  <div class="login-left">
+    <div class="ll-brand">Nutri<em>App</em></div>
+    <div class="ll-sub">Plataforma de Nutrição Personalizada</div>
+    <div class="ll-feat">
+      <div class="ll-feat-item"><div class="ll-feat-icon">🥗</div><div class="ll-feat-text">Planos alimentares personalizados com tabela TACO/Unicamp</div></div>
+      <div class="ll-feat-item"><div class="ll-feat-icon">🧮</div><div class="ll-feat-text">Calculadora IIFYM automática com Mifflin-St Jeor e Katch-McArdle</div></div>
+      <div class="ll-feat-item"><div class="ll-feat-icon">🧠</div><div class="ll-feat-text">IA Consultora com mecanismos de ação por patologia</div></div>
+      <div class="ll-feat-item"><div class="ll-feat-icon">📊</div><div class="ll-feat-text">Relatórios de adesão e acompanhamento em tempo real</div></div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-card">
+      <div class="lc-title">Bem-vindo(a)</div>
+      <div class="lc-sub">Faça login — o sistema direcionará automaticamente para a área correta de acordo com seu perfil.</div>
+      <div style="margin-bottom:16px">
+        <div class="fl">Acesso rápido (demonstração)</div>
+        <div class="demo-pills">
+          <div class="demo-pill" onclick="fillDemo('admin')">🩺 Nutricionista (Admin)</div>
+          <div class="demo-pill" onclick="fillDemo('patient')">👤 Paciente</div>
+        </div>
+      </div>
+      <div id="login-err" class="err-box" style="display:none"></div>
+      <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com.br" autocomplete="email"></div>
+      <div class="field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn-login" onclick="doLogin()" id="btn-login">Entrar na plataforma</button>
+      <div class="login-lgpd">🔒 Dados protegidos conforme a <strong>LGPD</strong> · Acesso exclusivo a usuários autorizados</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ ADMIN SHELL ═══════════════════════════════ -->
+<div class="shell" id="admin-shell">
+  <aside class="sb">
+    <div class="sb-brand">
+      <div class="sb-logo">Nutri<em>App</em></div>
+      <div class="sb-badge">Nutricionista</div>
+    </div>
+    <div class="sb-user">
+      <div class="sb-av" id="admin-av">DN</div>
+      <div><div class="sb-uname" id="admin-name">Dra. Natalia Souza</div><div class="sb-urole" id="admin-role">CRN 3 · 12345</div></div>
+    </div>
+    <nav class="sb-nav">
+      <div class="si on" data-p="dash"><span class="si-ic">📊</span><span class="si-lb">Dashboard</span></div>
+      <div class="si" data-p="pac"><span class="si-ic">👥</span><span class="si-lb">Pacientes</span></div>
+      <div class="si" data-p="plano"><span class="si-ic">🥗</span><span class="si-lb">Plano Alimentar</span></div>
+      <div class="si" data-p="feedback"><span class="si-ic">💬</span><span class="si-lb">Feedback</span><span class="si-ct" id="fb-badge">3</span></div>
+      <div class="si" data-p="rel"><span class="si-ic">📈</span><span class="si-lb">Relatórios</span></div>
+      <div class="si" data-p="ia"><span class="si-ic">🧠</span><span class="si-lb">IA Consultora</span></div>
+    </nav>
+    <div class="sb-foot">
+      <button type="button" class="sb-logout" onclick="logout()"><span>↩</span><span>Sair</span></button>
+      🔒 LGPD compliant · Dados criptografados · Uso profissional exclusivo
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-title" id="page-title">Dashboard</div>
+      <div class="tb-right" id="tb-actions"></div>
+    </div>
+    <div class="content" id="admin-content"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ PATIENT SHELL ═══════════════════════════════ -->
+<div class="patient-shell" id="patient-shell">
+  <div class="ph-status">
+    <span class="ph-status-time" id="ph-clock">09:41</span>
+    <span style="font-size:11px;color:rgba(255,255,255,.6)">●●● WiFi 🔋</span>
+  </div>
+  <div class="ph-header">
+    <div class="ph-brand">Nutri<em>App</em></div>
+    <div class="ph-user"><div class="ph-dot"></div><span class="ph-uname" id="ph-uname">Maria Silva</span></div>
+  </div>
+  <div class="ph-scroll" id="ph-content"></div>
+  <nav class="ph-nav">
+    <button class="pn on" data-pp="cardapio"><span class="pn-ic">🥗</span><span class="pn-lb">Cardápio</span></button>
+    <button class="pn" data-pp="compras"><span class="pn-ic">🛒</span><span class="pn-lb">Compras</span></button>
+    <button class="pn" data-pp="info"><span class="pn-ic">📋</span><span class="pn-lb">Informativa</span></button>
+    <button class="pn" data-pp="diario"><span class="pn-ic">📖</span><span class="pn-lb">Diário</span></button>
+    <button class="pn" data-pp="exercicios"><span class="pn-ic">💪</span><span class="pn-lb">Exercícios</span></button>
+  </nav>
+</div>
+
+<!-- MODAL ROOT -->
+<div id="modal-root"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════════
+const PATS=[
+  {id:1,n:"Maria Silva",in:"MS",cl:"#2D5A3D",bg:"#E4F3EA",age:35,g:"F",w:72,h:165,bf:28,act:"moderado",goal:"deficit",conds:["Depressão","Ansiedade"],notes:"Prefere naturais. Evita glúten.",adh:82,plan:{}},
+  {id:2,n:"João Costa",in:"JC",cl:"#1A4F82",bg:"#E3EEF7",age:45,g:"M",w:88,h:178,bf:null,act:"leve",goal:"deficit",conds:["Hipertensão","Sobrepeso"],notes:"Home office. Gosta de cozinhar.",adh:68,plan:{}},
+  {id:3,n:"Ana Ferreira",in:"AF",cl:"#8B3510",bg:"#F5EBE4",age:28,g:"F",w:58,h:162,bf:22,act:"ativo",goal:"surplus",conds:["Anemia ferropriva"],notes:"Musculação 4×/sem. Vegetariana.",adh:91,plan:{}},
+];
+const TACO=[
+  {id:1,n:"Arroz integral cozido",cal:124,c:25.8,p:2.6,f:1.0,fi:2.7,cat:"Cereais"},
+  {id:2,n:"Aveia em flocos",cal:394,c:66.6,p:13.9,f:8.5,fi:9.1,cat:"Cereais"},
+  {id:3,n:"Feijão carioca cozido",cal:76,c:13.6,p:4.8,f:0.5,fi:8.4,cat:"Leguminosas"},
+  {id:4,n:"Feijão preto cozido",cal:77,c:14.0,p:4.5,f:0.5,fi:8.4,cat:"Leguminosas"},
+  {id:5,n:"Peito de frango grelhado",cal:159,c:0,p:32.1,f:2.9,fi:0,cat:"Carnes"},
+  {id:6,n:"Carne bovina magra",cal:163,c:0,p:28.0,f:5.2,fi:0,cat:"Carnes"},
+  {id:7,n:"Ovo de galinha cozido",cal:146,c:0.6,p:13.0,f:9.5,fi:0,cat:"Ovos"},
+  {id:8,n:"Salmão grelhado",cal:185,c:0,p:27.3,f:8.1,fi:0,cat:"Peixes"},
+  {id:9,n:"Atum enlatado em água",cal:110,c:0,p:25.6,f:0.8,fi:0,cat:"Peixes"},
+  {id:10,n:"Sardinha em lata",cal:192,c:0,p:24.5,f:10.5,fi:0,cat:"Peixes"},
+  {id:11,n:"Batata-doce cozida",cal:77,c:18.4,p:0.6,f:0.1,fi:2.5,cat:"Tubérculos"},
+  {id:12,n:"Banana prata",cal:98,c:26.0,p:1.3,f:0.1,fi:2.0,cat:"Frutas"},
+  {id:13,n:"Maçã com casca",cal:56,c:15.2,p:0.3,f:0.1,fi:1.3,cat:"Frutas"},
+  {id:14,n:"Abacate",cal:96,c:6.0,p:1.2,f:8.4,fi:6.3,cat:"Frutas"},
+  {id:15,n:"Brócolis cru",cal:34,c:3.6,p:4.4,f:0.5,fi:3.0,cat:"Vegetais"},
+  {id:16,n:"Espinafre cru",cal:22,c:3.4,p:2.5,f:0.3,fi:2.2,cat:"Vegetais"},
+  {id:17,n:"Iogurte grego integral",cal:115,c:5.2,p:9.9,f:5.5,fi:0,cat:"Lácteos"},
+  {id:18,n:"Queijo minas frescal",cal:264,c:3.2,p:17.4,f:20.2,fi:0,cat:"Lácteos"},
+  {id:19,n:"Quinoa cozida",cal:120,c:21.3,p:4.4,f:1.9,fi:2.8,cat:"Cereais"},
+  {id:20,n:"Azeite de oliva extra virgem",cal:884,c:0,p:0,f:100,fi:0,cat:"Óleos"},
+  {id:21,n:"Amendoim torrado s/ sal",cal:581,c:19.9,p:26.4,f:47.5,fi:8.0,cat:"Oleaginosas"},
+  {id:22,n:"Lentilha cozida",cal:93,c:15.6,p:6.3,f:0.4,fi:7.9,cat:"Leguminosas"},
+  {id:23,n:"Batata inglesa cozida",cal:52,c:11.4,p:1.5,f:0.1,fi:1.0,cat:"Tubérculos"},
+  {id:24,n:"Pão integral",cal:253,c:47.2,p:9.4,f:3.4,fi:6.9,cat:"Panificados"},
+  {id:25,n:"Laranja pera",cal:37,c:8.9,p:1.0,f:0.1,fi:0.8,cat:"Frutas"},
+];
+const MEALS=["Café da manhã","Lanche manhã","Almoço","Lanche tarde","Jantar","Ceia"];
+const FOODS_PATIENT=[
+  {id:1,n:"Aveia com banana",meal:"Café da manhã",cal:220,c:42,p:7,f:4,qty:"1 xíc + 1 un"},
+  {id:2,n:"Ovos mexidos",meal:"Café da manhã",cal:180,c:2,p:14,f:13,qty:"2 unidades"},
+  {id:3,n:"Frango grelhado",meal:"Almoço",cal:210,c:0,p:38,f:5,qty:"150g"},
+  {id:4,n:"Arroz integral",meal:"Almoço",cal:170,c:36,p:4,f:1,qty:"4 col. sopa"},
+  {id:5,n:"Salada verde c/ azeite",meal:"Almoço",cal:80,c:5,p:2,f:6,qty:"1 prato"},
+  {id:6,n:"Iogurte grego",meal:"Lanche",cal:130,c:8,p:10,f:6,qty:"1 pote 170g"},
+  {id:7,n:"Salmão assado",meal:"Jantar",cal:280,c:0,p:35,f:14,qty:"150g"},
+  {id:8,n:"Brócolis vapor",meal:"Jantar",cal:55,c:10,p:4,f:0,qty:"1 xícara"},
+];
+const MSGS=[
+  {id:1,pid:1,pn:"Maria Silva",in:"MS",cl:"#2D5A3D",bg:"#E4F3EA",prev:"Consegui todas as refeições hoje! Humor melhor 😊",time:"Hoje 09:14",mood:"😊",ur:true,full:"Oi doutora! Hoje consegui fazer todas as refeições do plano. Humor muito mais estável. Obrigada!"},
+  {id:2,pid:2,pn:"João Costa",in:"JC",cl:"#1A4F82",bg:"#E3EEF7",prev:"Tive dificuldade no almoço, saí para reunião 😟",time:"Ontem 18:40",mood:"😟",ur:true,full:"Tive dificuldade no almoço. Comi fora numa reunião. O que a senhora sugere nesses casos?"},
+  {id:3,pid:3,pn:"Ana Ferreira",in:"AF",cl:"#8B3510",bg:"#F5EBE4",prev:"Semana ótima! Adesão 100%, peso +0.4kg 💪",time:"Ontem 12:00",mood:"💪",ur:true,full:"Semana excelente! Todos os treinos e adesão 100% ao plano. Peso subiu 0.4kg de massa magra!"},
+  {id:4,pid:1,pn:"Maria Silva",in:"MS",cl:"#2D5A3D",bg:"#E4F3EA",prev:"Posso substituir o salmão? Estava caro 🤔",time:"2 dias 15:30",mood:"🤔",ur:false,full:"Doutora, posso substituir o salmão esta semana? Estava caro. Sardinha serviria?"},
+];
+const EMOJIS=["😊","😄","😐","😔","😢","😤","😴","💪","🤒","😰"];
+
+// ══════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════
+let S={
+  role:null, user:null,
+  adminPage:'dash',
+  patPage:'cardapio',
+  tq:'',tsel:null,mealTab:'Café da manhã',
+  checked:{},water:0,waterTarget:8,calTarget:1800,
+  diaryText:'',diaryEmoji:'',diarySaved:null,
+  selFb:null,relPat:null,relSearch:'',
+  selPat:PATS[0],
+  aiMsgs:[],aiPatho:'',aiLoad:false,
+};
+
+// ══════════════════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════════════════
+function fillDemo(r){
+  if(r==='admin'){document.getElementById('login-email').value='admin@nutriapp.com';document.getElementById('login-pass').value='admin123';}
+  else{document.getElementById('login-email').value='maria@nutriapp.com';document.getElementById('login-pass').value='maria123';}
+  document.querySelectorAll('.demo-pill').forEach(p=>p.classList.remove('sel'));
+  event.target.classList.add('sel');
+}
+async function doLogin(){
+  const e=document.getElementById('login-email').value.trim().toLowerCase();
+  const p=document.getElementById('login-pass').value;
+  const errEl=document.getElementById('login-err');
+  if(!e||!p){errEl.textContent='Preencha e-mail e senha.';errEl.style.display='block';return;}
+  const res=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:e,password:p})});
+  if(!res.ok){errEl.textContent='E-mail ou senha incorretos. Tente novamente.';errEl.style.display='block';return;}
+  const u=await res.json();
+  errEl.style.display='none';
+  S.role=u.role;S.user=u;
+  document.getElementById('login-screen').style.display='none';
+  if(u.role==='admin'){
+    document.getElementById('admin-av').textContent=u.av;
+    document.getElementById('admin-name').textContent=u.name;
+    document.getElementById('admin-role').textContent=u.sub;
+    document.getElementById('admin-shell').classList.add('show');
+    renderAdmin();
+  } else {
+    const pat=PATS.find(p=>p.id===u.pid)||PATS[0];
+    S.selPat=pat;
+    document.getElementById('ph-uname').textContent=pat.n;
+    document.getElementById('patient-shell').classList.add('show');
+    renderPatient();
+  }
+}
+
+function logout(){
+  S.role=null;S.user=null;
+  document.getElementById('admin-shell').classList.remove('show');
+  document.getElementById('patient-shell').classList.remove('show');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-email').value='';
+  document.getElementById('login-pass').value='';
+  const errEl=document.getElementById('login-err');
+  if(errEl){errEl.textContent='';errEl.style.display='none';}
+  document.querySelectorAll('.demo-pill').forEach(p=>p.classList.remove('sel'));
+  document.getElementById('modal-root').innerHTML='';
+  setTimeout(()=>document.getElementById('login-email').focus(),40);
+}
+
+// ══════════════════════════════════════════════════════════
+//  IIFYM
+// ══════════════════════════════════════════════════════════
+function iifym(p){
+  let bmr,met;const bf=parseFloat(p.bf)||null;
+  if(bf&&bf>0){const lbm=p.w*(1-bf/100);bmr=370+21.6*lbm;met=`Katch-McArdle (BF=${bf}%)`;}
+  else{bmr=p.g==='M'?10*p.w+6.25*p.h-5*p.age+5:10*p.w+6.25*p.h-5*p.age-161;met='Mifflin-St Jeor';}
+  const mlt={sedentario:1.2,leve:1.375,moderado:1.55,ativo:1.725,muito_ativo:1.9}[p.act]||1.55;
+  const tdee=bmr*mlt;
+  const kcal=p.goal==='deficit'?tdee-500:p.goal==='surplus'?tdee+300:tdee;
+  const lbm2=bf?p.w*(1-bf/100):p.w*0.82;
+  const pr=Math.round(lbm2*2);const ft=Math.round(p.w*0.9);
+  const cb=Math.round(Math.max(0,kcal-pr*4-ft*9)/4);
+  return{kcal:Math.round(kcal),tdee:Math.round(tdee),bmr:Math.round(bmr),pr,ft,cb,met};
+}
+function planTotals(plan){
+  let cal=0,c=0,pr=0,f=0,fi=0;
+  Object.values(plan).forEach(m=>(m||[]).forEach(i=>{const s=i.q/100;cal+=i.food.cal*s;c+=i.food.c*s;pr+=i.food.p*s;f+=i.food.f*s;fi+=i.food.fi*s;}));
+  return{cal:Math.round(cal),c:Math.round(c),pr:Math.round(pr),f:Math.round(f),fi:Math.round(fi)};
+}
+function adColor(v){return v>=80?'#2D8050':v>=60?'#C49A3C':'#B83232';}
+function adTag(v){return v>=80?'tg':v>=60?'ta':'tr';}
+function unread(){return MSGS.filter(m=>m.ur).length;}
+
+// ══════════════════════════════════════════════════════════
+//  ADMIN PAGES
+// ══════════════════════════════════════════════════════════
+function aDash(){
+  const avg=Math.round(PATS.reduce((a,p)=>a+p.adh,0)/PATS.length);
+  const ii=iifym(PATS[0]);
+  const wv=[68,72,76,80,78,84,80];
+  return`<div class="stat-grid">
+<div class="stat-card"><span class="stat-ic">👥</span><div class="stat-v">${PATS.length}</div><div class="stat-l">Pacientes ativos</div><div class="stat-t up">↑ +1 este mês</div></div>
+<div class="stat-card"><span class="stat-ic">📋</span><div class="stat-v">${PATS.filter(p=>Object.keys(p.plan).length>0).length}</div><div class="stat-l">Planos configurados</div><div class="stat-t up">↑ em andamento</div></div>
+<div class="stat-card"><span class="stat-ic">📊</span><div class="stat-v">${avg}%</div><div class="stat-l">Adesão média</div><div class="stat-t ${avg>=75?'up':'dn'}">${avg>=75?'↑ Boa adesão':'↓ Atenção'}</div></div>
+<div class="stat-card"><span class="stat-ic">💬</span><div class="stat-v">${unread()}</div><div class="stat-l">Feedbacks não lidos</div><div class="stat-t dn">↑ Aguardando</div></div>
+</div>
+<div class="two">
+<div>
+<div class="card"><div class="sec">Adesão dos pacientes</div>
+${PATS.map(p=>`<div class="adh-row"><div class="adh-name">${p.n.split(' ')[0]} ${p.n.split(' ')[1][0]}.</div><div class="adh-bar"><div class="adh-fill" style="width:${p.adh}%;background:${adColor(p.adh)}"></div></div><div class="adh-pct">${p.adh}%</div><span class="tag ${adTag(p.adh)}">${p.adh>=80?'Ótimo':p.adh>=60?'Regular':'Baixo'}</span></div>`).join('')}
+<div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px;font-size:12px;color:var(--muted)">Média geral: <strong style="color:var(--ink)">${avg}%</strong></div></div>
+<div class="card"><div class="sec">Últimas mensagens</div>
+${MSGS.slice(0,3).map(m=>`<div class="fb-item ${m.ur?'ur':''}" onclick="S.adminPage='feedback';S.selFb=${m.id};renderAdmin()" style="cursor:pointer">
+<div style="display:flex;gap:10px;align-items:center">
+<div class="fb-av" style="background:${m.bg};color:${m.cl}">${m.in}</div>
+<div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between"><span class="fb-sender">${m.pn}</span><span style="font-size:17px">${m.mood}</span></div>
+<div class="fb-time">${m.time}</div><div class="fb-preview">${m.prev}</div></div></div></div>`).join('')}</div>
+</div>
+<div>
+<div class="card"><div class="sec">Adesão média — 7 dias</div>
+<div class="bar-chart">${wv.map((v,i)=>{const d=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];const h=Math.round(v/100*86);return`<div class="bc-col"><div class="bc-val">${v}%</div><div class="bc-bar" style="height:${h}px;background:${adColor(v)};border-radius:4px 4px 0 0"></div><div class="bc-lbl">${d[i]}</div></div>`;}).join('')}</div>
+<div style="font-size:11px;color:var(--muted);margin-top:8px">Melhor: Sáb 84% · Pior: Seg 68%</div></div>
+<div class="sec" style="margin-top:4px">IIFYM — ${PATS[0].n.split(' ')[0]}</div>
+<div class="iifym-box"><div class="ii-title">Meta calculada · ${ii.met}</div>
+<div class="ii-grid">
+<div><div class="ii-v">${ii.kcal}</div><div class="ii-l">kcal/dia</div></div>
+<div><div class="ii-v">${ii.cb}g</div><div class="ii-l">Carbos</div></div>
+<div><div class="ii-v">${ii.pr}g</div><div class="ii-l">Proteína</div></div>
+<div><div class="ii-v">${ii.ft}g</div><div class="ii-l">Lipídios</div></div>
+<div><div class="ii-v">${ii.tdee}</div><div class="ii-l">TDEE</div></div>
+</div>
+<div class="ii-sub">BMR: ${ii.bmr} kcal · Déficit: −500 kcal · Prot: 2g/kg MLM · Lip: 0.9g/kg</div></div>
+</div></div>`;
+}
+
+function aPac(){
+  return`<div class="pat-grid">
+${PATS.map(p=>{const ii=iifym(p);return`<div class="pat-card" onclick="openEdit(${p.id})">
+<div class="pat-av" style="background:${p.bg};color:${p.cl}">${p.in}</div>
+<div class="pat-name">${p.n}</div>
+<div class="pat-meta">${p.age} anos · ${p.w}kg · ${p.h}cm${p.bf?` · BF ${p.bf}%`:''}<br>Meta: <strong>${ii.kcal} kcal</strong> · P:${ii.pr}g C:${ii.cb}g L:${ii.ft}g</div>
+<div style="margin-bottom:10px">${p.conds.map(c=>`<span class="cond">${c}</span>`).join('')}</div>
+<div class="adh-row"><div class="adh-bar"><div class="adh-fill" style="width:${p.adh}%;background:${adColor(p.adh)}"></div></div><span class="tag ${adTag(p.adh)}" style="margin-left:8px">${p.adh}%</span></div>
+</div>`;}).join('')}
+<div class="pat-card new" onclick="openNewPat()"><div style="font-size:36px;margin-bottom:12px">➕</div><div style="font-size:14px;font-weight:600;color:var(--muted)">Novo paciente</div><div style="font-size:12px;color:var(--muted);margin-top:6px;text-align:center">Cadastrar + calcular IIFYM</div></div>
+</div>`;
+}
+
+function aPlano(){
+  const p=S.selPat;const ii=iifym(p);
+  const tf=TACO.filter(f=>f.n.toLowerCase().includes(S.tq.toLowerCase())||f.cat.toLowerCase().includes(S.tq.toLowerCase())).slice(0,22);
+  const mi=p.plan[S.mealTab]||[];const t=planTotals(p.plan);const diff=t.cal-ii.kcal;
+  const diffCol=Math.abs(diff)<100?'#2D8050':diff>0?'#B83232':'#1A4F82';
+  const diffTxt=Math.abs(diff)<100?'✅ Na meta':diff>0?'⚠️ Acima':'⚠️ Abaixo';
+  return`<div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+<div style="display:flex;align-items:center;gap:14px">
+<div class="pat-av" style="background:${p.bg};color:${p.cl};width:46px;height:46px;font-size:14px;margin-bottom:0">${p.in}</div>
+<div><div style="font-size:15px;font-weight:600;color:var(--ink)">${p.n}</div>
+<div style="font-size:12px;color:var(--muted)">${p.age} anos · ${p.w}kg · Meta: <strong style="color:var(--forest)">${ii.kcal} kcal</strong> · P:${ii.pr}g C:${ii.cb}g L:${ii.ft}g</div></div>
+</div>
+<div style="display:flex;gap:8px;align-items:center">
+<select onchange="S.selPat=PATS.find(p=>p.id==this.value);S.tsel=null;renderAdmin()" style="padding:8px 12px;border-radius:var(--r);border:1px solid var(--border);font-size:13px;background:#fff;color:var(--ink);cursor:pointer">
+${PATS.map(pt=>`<option value="${pt.id}" ${pt.id===p.id?'selected':''}>${pt.n}</option>`).join('')}
+</select>
+<button class="tb-btn primary" onclick="alert('Plano salvo e enviado ao app do paciente!')">💾 Salvar</button>
+</div></div>
+<div class="builder">
+<div class="panel">
+<div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">🔍 Tabela TACO — Unicamp (${TACO.length} alimentos)</div>
+<input class="srch" placeholder="Pesquisar alimento ou categoria..." value="${S.tq}" oninput="S.tq=this.value;renderAdmin()">
+<div class="tlist">${tf.length===0?'<div class="empty-st">Nenhum alimento encontrado</div>':tf.map(f=>`<div class="ti" onclick="selFood(${f.id})"><div><div class="ti-n">${f.n}</div><div class="ti-m">${f.cat} · C:${f.c}g P:${f.p}g L:${f.f}g (por 100g)</div></div><div class="ti-c">${f.cal} kcal</div></div>`).join('')}</div>
+${S.tsel?(()=>{const fd=TACO.find(x=>x.id===S.tsel);return`<div class="add-form"><div style="font-size:13px;font-weight:600;color:var(--forest);margin-bottom:2px">${fd.n}</div><div style="font-size:11px;color:var(--sage);margin-bottom:8px">${fd.cat} · ${fd.cal} kcal/100g · C:${fd.c}g P:${fd.p}g L:${fd.f}g</div><div class="qty-row"><input class="qty-inp" type="number" id="qinp" value="100" min="1" max="2000"><span style="font-size:12px;color:var(--muted)">gramas</span><button class="btn-sm primary" onclick="addFood()">+ Adicionar</button><button class="btn-sm" onclick="S.tsel=null;renderAdmin()">✕</button></div></div>`;})():''}
+</div>
+<div class="panel">
+<div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px">📋 Plano alimentar do dia</div>
+<div class="meal-tabs">${MEALS.map(m=>`<div class="mt ${S.mealTab===m?'on':''}" onclick="S.mealTab='${m}';renderAdmin()">${m}${(p.plan[m]||[]).length>0?` (${(p.plan[m]||[]).length})`:''}</div>`).join('')}</div>
+<div class="plan-list">${mi.length===0?`<div class="empty-st">Nenhum alimento no ${S.mealTab}<br><small>Pesquise e adicione à esquerda</small></div>`:mi.map((item,idx)=>{const s=item.q/100;return`<div class="plan-item"><div><div class="pi-name">${item.food.n}</div><div class="pi-meta">${item.q}g · C:${Math.round(item.food.c*s)}g P:${Math.round(item.food.p*s)}g L:${Math.round(item.food.f*s)}g</div></div><div style="display:flex;align-items:center;gap:6px"><span class="pi-kcal">${Math.round(item.food.cal*s)} kcal</span><span class="pi-del" onclick="delItem('${S.mealTab}',${idx})">✕</span></div></div>`;}).join('')}</div>
+<div class="plan-tots"><div style="font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px">Total do dia</div>
+<div class="pt-grid">
+<div><div class="pt-v">${t.cal}</div><div class="pt-l">kcal</div></div>
+<div><div class="pt-v">${t.c}g</div><div class="pt-l">Carbos</div></div>
+<div><div class="pt-v">${t.pr}g</div><div class="pt-l">Proteína</div></div>
+<div><div class="pt-v">${t.f}g</div><div class="pt-l">Lipídios</div></div>
+<div><div class="pt-v">${t.fi}g</div><div class="pt-l">Fibras</div></div>
+</div>
+<div style="font-size:12px;color:var(--muted);margin-top:8px">Meta: ${ii.kcal} kcal · Saldo: <strong style="color:${diffCol}">${diff>0?'+':''}${diff} kcal — ${diffTxt}</strong></div>
+</div>
+<button class="btn-sm primary" style="width:100%;margin-top:10px;padding:10px;text-align:center" onclick="alert('Plano salvo e publicado no app do paciente!')">💾 Salvar e enviar ao paciente</button>
+</div></div>`;
+}
+
+function aFeedback(){
+  const sel=S.selFb!=null?MSGS.find(m=>m.id===S.selFb):null;
+  if(sel&&sel.ur)sel.ur=false;
+  return`<div class="fb-layout">
+<div>
+<div class="sec">Feedbacks recebidos</div>
+<div style="background:var(--gold-lt);border-radius:var(--r);padding:8px 12px;font-size:11px;color:#633806;margin-bottom:12px;border:1px solid rgba(196,154,60,.2)">📖 Entradas do diário pessoal dos pacientes são exibidas aqui para acompanhamento clínico.</div>
+${MSGS.map(m=>`<div class="fb-item ${m.ur?'ur':''}" onclick="S.selFb=${m.id};renderAdmin()">
+<div style="display:flex;gap:10px;align-items:center"><div class="fb-av" style="background:${m.bg};color:${m.cl}">${m.in}</div>
+<div style="flex:1;min-width:0"><div style="display:flex;justify-content:space-between"><span class="fb-sender">${m.pn}${m.ur?' <span style="font-size:9px;background:var(--mint-lt);color:var(--sage);padding:1px 6px;border-radius:8px;font-weight:700;margin-left:4px">NOVO</span>':''}</span><span style="font-size:17px">${m.mood}</span></div>
+<div class="fb-time">${m.time}</div><div class="fb-preview">${m.prev}</div></div></div></div>`).join('')}
+</div>
+<div>
+${sel?`<div class="sec">Mensagem — ${sel.pn}</div>
+<div class="fb-detail">
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+<div class="fb-av" style="background:${sel.bg};color:${sel.cl};width:42px;height:42px;font-size:13px">${sel.in}</div>
+<div><div style="font-size:15px;font-weight:600;color:var(--ink)">${sel.pn} ${sel.mood}</div><div class="fb-time">${sel.time}</div></div>
+</div>
+<div style="font-size:14px;color:var(--ink2);line-height:1.8;margin-bottom:14px">${sel.full}</div>
+<div style="background:var(--mint-lt);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--sage)">
+<strong>Perfil:</strong> ${PATS.find(p=>p.id===sel.pid)?.age} anos · ${PATS.find(p=>p.id===sel.pid)?.w}kg · ${PATS.find(p=>p.id===sel.pid)?.conds.join(', ')}
+</div>
+<textarea class="resp-ta" placeholder="Escreva sua resposta ou orientação clínica..."></textarea>
+<div style="display:flex;gap:8px;margin-top:10px">
+<button class="btn-sm primary" onclick="alert('Resposta enviada!')">📤 Responder</button>
+<button class="btn-sm" onclick="S.adminPage='plano';S.selPat=PATS.find(p=>p.id===${sel.pid})||S.selPat;renderAdmin()">🥗 Ver plano</button>
+</div></div>`
+:`<div class="empty-st" style="margin-top:60px"><div style="font-size:36px;margin-bottom:12px">💬</div><div style="font-size:14px">Selecione uma mensagem para visualizar</div></div>`}
+</div></div>`;
+}
+
+function aRel(){
+  const filtered=S.relSearch?PATS.filter(p=>p.n.toLowerCase().includes(S.relSearch.toLowerCase())):PATS;
+  const sel=S.relPat!=null?PATS.find(p=>p.id===S.relPat):null;
+  const wv=[68,72,76,80,78,84,80];
+  return`<div class="two" style="align-items:start">
+<div>
+<div class="sec">Filtrar por paciente</div>
+<div class="rel-filter"><input class="rel-search" id="rel-s" placeholder="Pesquisar paciente..." value="${S.relSearch}" oninput="S.relSearch=this.value;renderAdmin()">
+${S.relPat!=null?`<button class="btn-sm" onclick="S.relPat=null;S.relSearch='';renderAdmin()">✕ Limpar</button>`:''}</div>
+${filtered.map(p=>`<div class="pat-opt ${S.relPat===p.id?'sel':''}" onclick="S.relPat=${p.id};S.relSearch='';renderAdmin()">
+<div class="pat-av-sm" style="background:${p.bg};color:${p.cl}">${p.in}</div>
+<div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--ink)">${p.n}</div>
+<div style="font-size:11px;color:var(--muted)">${p.conds.join(' · ')}</div></div>
+<span class="tag ${adTag(p.adh)}">${p.adh}%</span></div>`).join('')}
+${sel?`<div class="card" style="margin-top:14px"><div class="sec">Resumo mensal — ${sel.n.split(' ')[0]}</div>
+<div class="three">
+${[['Refeições','92/100','↑ 92%','#2D8050'],['Peso atual',sel.w+' kg','↑ estável','#2D8050'],['Hidratação','87%','↑ Ótimo','#2D8050']].map(([l,v,t,c])=>`<div style="background:var(--cream);border-radius:var(--r);padding:12px;text-align:center"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">${l}</div><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--ink)">${v}</div><div style="font-size:11px;color:${c};margin-top:3px;font-weight:500">${t}</div></div>`).join('')}
+</div></div>`:''}
+</div>
+<div>
+<div class="sec">${sel?`Evolução calórica — ${sel.n.split(' ')[0]}`:'Selecione um paciente para ver seus dados'}</div>
+${sel?`<div class="card"><div class="bar-chart">${wv.map((v,i)=>{const d=['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];const h=Math.round(v/100*86);return`<div class="bc-col"><div class="bc-val" style="font-size:8px">${v}%</div><div class="bc-bar" style="height:${h}px;background:${adColor(v)}"></div><div class="bc-lbl">${d[i]}</div></div>`;}).join('')}</div>
+<div style="font-size:11px;color:var(--muted);margin-top:8px">Meta: ${iifym(sel).kcal} kcal/dia · Boa consistência esta semana</div></div>
+<div class="card"><div class="sec">Distribuição de macros</div>
+<div class="donut-wrap">
+<svg viewBox="0 0 120 120" width="110" height="110" style="flex-shrink:0">
+<circle cx="60" cy="60" r="48" fill="none" stroke="#F0F0EE" stroke-width="22"/>
+<circle cx="60" cy="60" r="48" fill="none" stroke="#4A8060" stroke-width="22" stroke-dasharray="120 181" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+<circle cx="60" cy="60" r="48" fill="none" stroke="#C49A3C" stroke-width="22" stroke-dasharray="72 229" stroke-dashoffset="-120" transform="rotate(-90 60 60)"/>
+<circle cx="60" cy="60" r="48" fill="none" stroke="#B55E3A" stroke-width="22" stroke-dasharray="109 192" stroke-dashoffset="-192" transform="rotate(-90 60 60)"/>
+</svg>
+<div class="pie-leg">
+<div class="pie-li"><div class="pie-dot" style="background:#4A8060"></div>Carboidratos 39%</div>
+<div class="pie-li"><div class="pie-dot" style="background:#C49A3C"></div>Proteínas 23%</div>
+<div class="pie-li"><div class="pie-dot" style="background:#B55E3A"></div>Lipídios 35%</div>
+<div style="font-size:11px;color:var(--muted);margin-top:8px">Total: ${iifym(sel).kcal-60} kcal · Meta: ${iifym(sel).kcal} kcal</div>
+</div></div></div>`:`<div class="empty-st" style="margin-top:80px"><div style="font-size:36px;margin-bottom:12px">👤</div>Selecione um paciente à esquerda para ver seus relatórios individuais</div>`}
+</div></div>`;
+}
+
+function aIA(){
+  const pathos=['Depressão','Ansiedade','Hipertensão','Diabetes tipo 2','Hipotireoidismo','Anemia ferropriva','Intestino irritável','Dislipidemia','Obesidade','Osteoporose','Artrite reumatoide','Enxaqueca'];
+  const quick=['Fontes de ômega-3 e EPA/DHA','Alimentos ricos em magnésio','Probióticos e eixo intestino-cérebro','Ferro heme vs não-heme','Triptofano e síntese de serotonina','Vitamina D — fontes e metabolismo'];
+  return`<div class="ai-lay">
+<div class="ai-sb">
+<div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px">Consultora IA</div>
+<div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Selecione uma patologia ou faça uma pergunta livre sobre nutrição clínica funcional.</div>
+<div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Patologias</div>
+${pathos.map(pt=>`<div class="pchip ${S.aiPatho===pt?'on':''}" onclick="selPatho('${pt}')">${pt}</div>`).join('')}
+<div style="height:1px;background:var(--border);margin:10px 0"></div>
+<div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px">Consultas rápidas</div>
+${quick.map(q=>`<div class="qlink" onclick="quickQ('${q}')">${q}</div>`).join('')}
+</div>
+<div class="ai-chat">
+<div class="ai-msgs" id="ai-msgs">
+${S.aiMsgs.length===0?`<div class="ai-msg b">Olá, Dra. Natalia! 👋<br><br>Sou sua consultora nutricional especializada. Posso ajudá-la com alimentos terapêuticos para patologias, mecanismos de ação de nutrientes e estratégias baseadas em evidências.<br><br>Selecione uma patologia ao lado ou faça sua pergunta.</div>`:S.aiMsgs.map(m=>`<div class="ai-msg ${m.r}">${m.t.replace(/\n/g,'<br>')}</div>`).join('')}
+${S.aiLoad?`<div class="ai-msg ld">⏳ Consultando base nutricional clínica...</div>`:''}
+</div>
+<div class="ai-foot">
+<input class="ai-inp" id="ai-inp" placeholder="Pergunte sobre alimentos, patologias, mecanismos de ação..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}">
+<button class="tb-btn primary" onclick="sendAI()">Enviar ↵</button>
+</div>
+</div></div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+//  ADMIN ROUTER
+// ══════════════════════════════════════════════════════════
+const TITLES={dash:'Dashboard',pac:'Pacientes',plano:'Plano Alimentar',feedback:'Feedback dos Pacientes',rel:'Relatórios',ia:'IA Consultora Nutricional'};
+function renderAdmin(){
+  const pages={dash:aDash,pac:aPac,plano:aPlano,feedback:aFeedback,rel:aRel,ia:aIA};
+  const c=document.getElementById('admin-content');
+  if(c)c.innerHTML=(pages[S.adminPage]||aDash)();
+  document.querySelectorAll('.si').forEach(b=>b.classList.toggle('on',b.dataset.p===S.adminPage));
+  const t=document.getElementById('page-title');
+  if(t)t.textContent=TITLES[S.adminPage]||'';
+  const ac=document.getElementById('tb-actions');
+  if(ac){
+    if(S.adminPage==='dash'||S.adminPage==='pac')
+      ac.innerHTML=`<button class="tb-btn primary" onclick="openNewPat()">+ Novo paciente</button>`;
+    else if(S.adminPage==='plano')
+      ac.innerHTML=`<button class="tb-btn" onclick="S.selPat.plan={};renderAdmin()">🗑 Limpar plano</button> <button class="tb-btn primary" onclick="alert('Plano salvo!')">💾 Salvar</button>`;
+    else if(S.adminPage==='ia')
+      ac.innerHTML=`<button class="tb-btn" onclick="S.aiMsgs=[];S.aiPatho='';renderAdmin()">🗑 Limpar chat</button>`;
+    else ac.innerHTML='';
+  }
+  const b=document.getElementById('fb-badge');
+  if(b){const n=unread();b.textContent=n;b.style.display=n?'inline':'none';}
+}
+
+function selFood(id){S.tsel=id;renderAdmin();setTimeout(()=>{const el=document.getElementById('qinp');if(el){el.focus();el.select();}},40);}
+function addFood(){
+  const q=parseFloat(document.getElementById('qinp').value)||100;
+  const food=TACO.find(f=>f.id===S.tsel);if(!food)return;
+  if(!S.selPat.plan[S.mealTab])S.selPat.plan[S.mealTab]=[];
+  S.selPat.plan[S.mealTab].push({food,q});S.tsel=null;renderAdmin();
+}
+function delItem(meal,idx){S.selPat.plan[meal].splice(idx,1);renderAdmin();}
+
+async function sendAI(){
+  const inp=document.getElementById('ai-inp');
+  const txt=inp?inp.value.trim():'';
+  if(!txt||S.aiLoad)return;
+  if(inp)inp.value='';
+  S.aiMsgs.push({r:'u',t:txt});S.aiLoad=true;renderAdmin();scrollAI();
+  try{
+    const res=await fetch('/api/ai/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,system:'Você é especialista em nutrição clínica funcional. Responda de forma técnica mas clara para uma nutricionista. Para alimentos: por que é indicado, composto bioativo, mecanismo de ação, quantidade sugerida. Máx 250 palavras.',messages:S.aiMsgs.map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}))})});
+    const d=await res.json();S.aiMsgs.push({r:'b',t:d.content.map(b=>b.text||'').join('')});
+  }catch(e){S.aiMsgs.push({r:'b',t:'⚠️ Integração com IA disponível na versão de produção com configuração da API key.'});}
+  S.aiLoad=false;renderAdmin();scrollAI();
+}
+function selPatho(pt){
+  S.aiPatho=pt;S.aiMsgs.push({r:'u',t:`Melhores alimentos para ${pt} com mecanismos de ação bioquímicos.`});
+  S.aiLoad=true;renderAdmin();scrollAI();
+  fetch('/api/ai/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,system:'Especialista em nutrição clínica. Para cada alimento: nome → composto ativo → mecanismo de ação → quantidade. Técnico para nutricionista. Máx 280 palavras.',messages:[{role:'user',content:`Alimentos terapêuticos para ${pt}: compostos ativos e mecanismos de ação bioquímicos.`}]})})
+    .then(r=>r.json()).then(d=>{S.aiMsgs.push({r:'b',t:d.content.map(b=>b.text||'').join('')});S.aiLoad=false;renderAdmin();scrollAI();})
+    .catch(()=>{S.aiMsgs.push({r:'b',t:'⚠️ Integração com IA disponível na versão de produção.'});S.aiLoad=false;renderAdmin();});
+}
+function quickQ(q){const inp=document.getElementById('ai-inp');if(inp){inp.value=q;inp.focus();}else{setTimeout(()=>{const i=document.getElementById('ai-inp');if(i){i.value=q;i.focus();}},100);}}
+function scrollAI(){setTimeout(()=>{const el=document.getElementById('ai-msgs');if(el)el.scrollTop=el.scrollHeight;},60);}
+
+// ══════════════════════════════════════════════════════════
+//  PATIENT PAGES
+// ══════════════════════════════════════════════════════════
+function getTotals(){let cal=0,c=0,p=0,f=0;FOODS_PATIENT.forEach(food=>{if(S.checked[food.id]){cal+=food.cal;c+=food.c;p+=food.p;f+=food.f;}});return{cal,c,p,f};}
+
+function pCardapio(){
+  const t=getTotals();const pct=Math.min(100,Math.round(t.cal/S.calTarget*100));
+  const circ=2*Math.PI*30;const off=circ-(pct/100)*circ;
+  const meals=['Café da manhã','Almoço','Lanche','Jantar'];
+  return`<div class="hero-card">
+<div class="hero-row">
+<div><div class="hero-greet">Olá, ${S.selPat.n.split(' ')[0]} 🌿</div>
+<div class="hero-cal">${t.cal} <span style="font-size:16px;color:rgba(255,255,255,.35);font-weight:300">/ ${S.calTarget} kcal</span></div>
+<div class="hero-sub">CONSUMIDO HOJE</div></div>
+<div class="ring-w">
+<svg width="76" height="76" class="ring-svg">
+<circle cx="38" cy="38" r="30" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="6"/>
+<circle cx="38" cy="38" r="30" fill="none" stroke="#9FCFB4" stroke-width="6" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${off}" style="transition:stroke-dashoffset .5s"/>
+</svg>
+<div class="ring-center"><div class="ring-pct">${pct}%</div><div class="ring-lbl">da meta</div></div>
+</div></div></div>
+<div class="macro-strip">
+${[['Carbos',t.c+'g','#C49A3C',Math.round(t.c/200*100)],['Prot.',t.p+'g','#B55E3A',Math.round(t.p/100*100)],['Lip.',t.f+'g','#1A5C9A',Math.round(t.f/65*100)],['kcal',t.cal,'#2D5A3D',pct]].map(([l,v,col,pct])=>`
+<div class="mc"><div class="mc-v" style="color:${col}">${v}</div><div class="mc-l">${l}</div><div class="mc-bar"><div class="mc-fill" style="width:${Math.min(100,pct)}%;background:${col}"></div></div></div>`).join('')}
+</div>
+<div class="water-card">
+<div class="water-top"><span class="water-title">💧 Hidratação</span><span class="water-ct">${S.water}/${S.waterTarget} copos · ${S.water*250}ml</span></div>
+<div class="glasses">${Array.from({length:S.waterTarget},(_,i)=>`<div class="glass ${i<S.water?'on':''}" onclick="S.water=i<S.water?i:i+1;renderPatient()"><div class="glass-fill" style="height:${i<S.water?'78%':'0'}"></div></div>`).join('')}</div>
+</div>
+${meals.map(meal=>{const mf=FOODS_PATIENT.filter(f=>f.meal===meal);const mkcal=mf.filter(f=>S.checked[f.id]).reduce((s,f)=>s+f.cal,0);
+return`<div class="p-card"><div class="p-card-title" style="display:flex;justify-content:space-between">${meal}${mkcal>0?`<span style="font-size:10px;padding:2px 8px;border-radius:10px;background:var(--mint-lt);color:var(--sage)">${mkcal} kcal</span>`:''}</div>
+${mf.map(f=>`<div class="food-row"><div class="fchk ${S.checked[f.id]?'on':''}" onclick="S.checked[${f.id}]=!S.checked[${f.id}];renderPatient()">${S.checked[f.id]?'✓':''}</div><div style="flex:1"><div class="fname">${f.n}</div><div class="fqty">${f.qty}</div></div><div class="fkcal">${f.cal} kcal</div></div>`).join('')}
+</div>`;}).join('')}`;
+}
+
+function pCompras(){
+  const cats={'Cereais & Frutas':['Aveia — 1 xícara/dia','Arroz integral — 4 col/dia','Banana — 1 un/dia','Maçã — 1 un/dia'],'Proteínas':['Frango — 150g/dia','Ovos — 2 un/dia','Salmão — 150g (3×/sem)'],'Vegetais':['Salada verde — 1 prato/dia','Brócolis — 1 xícara/dia'],'Lácteos':['Iogurte grego — 1 pote/dia']};
+  return Object.entries(cats).map(([cat,items])=>`<div class="p-card"><div class="p-card-title">${cat}</div>${items.map(i=>`<div class="food-row"><div class="fname">${i}</div></div>`).join('')}</div>`).join('')+`<div class="p-card" style="text-align:center;padding:18px"><div style="font-size:24px;margin-bottom:8px">📄</div><div style="font-size:12px;color:var(--muted);margin-bottom:10px">Exportar lista em PDF</div><button class="btn-sm primary" onclick="alert('PDF gerado com sucesso!')">Gerar PDF</button></div>`;
+}
+
+function pInfo(){
+  const foods=[
+    {n:"Aveia",tag:"Cereal integral",txt:"Rica em betaglucana que reduz colesterol LDL e regula a glicemia. Efeito na microbiota e saciedade prolongada."},
+    {n:"Salmão",tag:"Peixe gordo",txt:"Ômega-3 (EPA/DHA) com ação neuroprotetora e anti-inflamatória. Essencial para produção de serotonina."},
+    {n:"Brócolis",tag:"Crucífera",txt:"Sulforafano com ação anticarcinogênica. Fonte de vitamina K, folato e antioxidantes poderosos."},
+    {n:"Banana",tag:"Fruta tropical",txt:"Triptofano e vitamina B6, precursores da serotonina. Auxilia no humor, sono e redução da ansiedade."},
+  ];
+  return foods.map(f=>`<div class="p-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px"><span style="font-size:14px;font-weight:600;color:var(--ink)">${f.n}</span><span style="font-size:10px;padding:2px 8px;border-radius:10px;background:var(--mint-lt);color:var(--sage);font-weight:500">${f.tag}</span></div><div style="font-size:12px;color:var(--muted);line-height:1.6">${f.txt}</div></div>`).join('');
+}
+
+function pDiario(){
+  const saved=S.diarySaved;const charLen=S.diaryText.length;const warn=charLen>250;
+  return`<div class="diary-card">
+<div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:7px"><span style="font-size:17px">📖</span>Meu Diário — ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long'})}</div>
+<div class="diary-notice"><strong>ℹ️ Diário pessoal</strong> — Este registro poderá ser visualizado pela sua nutricionista para acompanhamento. Não é um canal de comunicação direta.</div>
+<div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:8px">Como você está se sentindo hoje?</div>
+<div class="diary-emojis">${EMOJIS.map(e=>`<div class="d-emoji ${S.diaryEmoji===e?'sel':''}" onclick="S.diaryEmoji=S.diaryEmoji==='${e}'?'':'${e}';renderPatient()" title="${e}">${e}</div>`).join('')}</div>
+${saved?`<div class="diary-saved"><strong>✅ Diário do dia salvo!</strong> ${S.diarySaved.emoji}<br><span style="color:var(--muted)">${S.diarySaved.text}</span><div style="margin-top:6px;font-size:10px;color:var(--muted)">Salvo às ${S.diarySaved.time}</div></div>
+<div class="no-comm">🔒 Apenas um registro por dia. Sua nutricionista poderá visualizar este registro.</div>`
+:`<textarea class="d-ta" id="d-ta" maxlength="300" placeholder="Escreva como você está se sentindo hoje... (máx. 300 caracteres)" oninput="S.diaryText=this.value;renderPatient()">${S.diaryText}</textarea>
+<div class="d-footer"><span class="d-chars ${warn?'warn':''}">${charLen}/300</span><button class="d-save" onclick="saveDiary()" ${!S.diaryText.trim()&&!S.diaryEmoji?'disabled':''}>💾 Salvar</button></div>
+<div class="no-comm">💬 Este campo não é uma mensagem para a nutricionista. É um registro pessoal do seu bem-estar diário.</div>`}
+</div>`;
+}
+
+function pExercicios(){
+  const cats=[{n:'🏠 Casa — sem equipamento',items:['Flexão de braço 3×12','Agachamento livre 4×15','Prancha 3×30s','Burpee 3×10']},{n:'💪 Academia',items:['Supino 4×12','Remada 3×12','Elevação lateral 3×15','Leg press 4×15']},{n:'🌿 Ao ar livre',items:['Caminhada leve 30 min','Corrida suave 20 min','Natação 30 min','Ciclismo 45 min']}];
+  return cats.map(c=>`<div class="p-card"><div class="p-card-title">${c.n}</div>${c.items.map(i=>`<div class="food-row"><div class="fname">${i}</div></div>`).join('')}</div>`).join('');
+}
+
+function renderPatient(){
+  const pages={cardapio:pCardapio,compras:pCompras,info:pInfo,diario:pDiario,exercicios:pExercicios};
+  const c=document.getElementById('ph-content');
+  if(c)c.innerHTML=(pages[S.patPage]||pCardapio)();
+  document.querySelectorAll('.pn').forEach(b=>b.classList.toggle('on',b.dataset.pp===S.patPage));
+}
+
+function saveDiary(){
+  if(!S.diaryText.trim()&&!S.diaryEmoji)return;
+  const now=new Date();S.diarySaved={text:S.diaryText||'(sem texto)',emoji:S.diaryEmoji,time:now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})};
+  renderPatient();
+}
+
+// ══════════════════════════════════════════════════════════
+//  MODAL — Cadastro de Paciente
+// ══════════════════════════════════════════════════════════
+function openNewPat(){
+  document.getElementById('modal-root').innerHTML=modalHTML(null);
+}
+function openEdit(id){
+  document.getElementById('modal-root').innerHTML=modalHTML(PATS.find(p=>p.id===id));
+}
+function modalHTML(ep){
+  const d=ep||{n:'',g:'F',age:'',w:'',h:'',bf:'',act:'moderado',goal:'deficit',conds:[],notes:''};
+  return`<div class="modal-bg show" onclick="if(event.target===this)closeModal()">
+<div class="modal" onclick="event.stopPropagation()">
+<div class="modal-head"><div class="modal-title">${ep?'Editar paciente':'Novo paciente'}</div><div class="modal-sub">${ep?ep.n+' · Cadastrado':' Cadastro + Cálculo IIFYM automático'}</div></div>
+<div class="modal-body">
+<div class="frow"><div><label class="fl">Nome completo *</label><input class="fi" id="fn" value="${d.n}" placeholder="Nome do paciente"></div><div><label class="fl">Gênero *</label><select class="fi" id="fg"><option value="F" ${d.g==='F'?'selected':''}>Feminino</option><option value="M" ${d.g==='M'?'selected':''}>Masculino</option></select></div></div>
+<div class="frow three"><div><label class="fl">Idade *</label><input class="fi" type="number" id="fa" value="${d.age}" placeholder="Ex: 32"></div><div><label class="fl">Peso kg *</label><input class="fi" type="number" id="fw" value="${d.w}" step="0.1" placeholder="Ex: 70"></div><div><label class="fl">Altura cm *</label><input class="fi" type="number" id="fh" value="${d.h}" placeholder="Ex: 165"></div></div>
+<div class="frow"><div><label class="fl">% Gordura corporal <small style="text-transform:none;font-weight:400">(opcional)</small></label><input class="fi" type="number" id="fbf" value="${d.bf||''}" step="0.1" placeholder="Ex: 25 — ativa Katch-McArdle"></div><div><label class="fl">Nível de atividade *</label><select class="fi" id="fact"><option value="sedentario" ${d.act==='sedentario'?'selected':''}>Sedentário</option><option value="leve" ${d.act==='leve'?'selected':''}>Leve (1-3×/sem)</option><option value="moderado" ${d.act==='moderado'?'selected':''}>Moderado (3-5×/sem)</option><option value="ativo" ${d.act==='ativo'?'selected':''}>Ativo (6-7×/sem)</option><option value="muito_ativo" ${d.act==='muito_ativo'?'selected':''}>Muito ativo</option></select></div></div>
+<div class="frow"><div><label class="fl">Objetivo *</label><select class="fi" id="fgoal"><option value="deficit" ${d.goal==='deficit'?'selected':''}>Perda de peso (−500 kcal)</option><option value="manutencao" ${d.goal==='manutencao'?'selected':''}>Manutenção</option><option value="surplus" ${d.goal==='surplus'?'selected':''}>Ganho de massa (+300 kcal)</option></select></div><div><label class="fl">Condições / Patologias</label><input class="fi" id="fconds" value="${(d.conds||[]).join(', ')}" placeholder="Ex: Hipertensão, Ansiedade"></div></div>
+<div class="frow full"><label class="fl">Observações clínicas</label><textarea class="fi" id="fnotes" placeholder="Preferências, alergias, restrições...">${d.notes||''}</textarea></div>
+<button onclick="calcPreview()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--r);background:var(--cream);font-size:13px;cursor:pointer;color:var(--ink);margin-bottom:12px;font-weight:500;transition:background .15s" onmouseover="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--mint-lt')" onmouseout="this.style.background=getComputedStyle(document.documentElement).getPropertyValue('--cream')">🧮 Calcular IIFYM — preview dos macros</button>
+<div id="iprev" style="display:none">
+<div class="iifym-box"><div class="ii-title">Sugestão de macros — IIFYM</div><div class="ii-grid" id="ivals"></div><div class="ii-sub" id="imet"></div></div>
+</div>
+</div>
+<div class="modal-foot">
+${ep?`<button class="btn-sm" style="margin-right:auto;background:var(--red-lt);color:var(--red);border-color:rgba(184,50,50,.2)" onclick="delPat(${ep.id})">Excluir</button>`:''}
+<button class="btn-sm" onclick="closeModal()">Cancelar</button>
+<button class="btn-sm primary" onclick="savePat(${ep?ep.id:'null'})">${ep?'Salvar alterações':'✅ Cadastrar paciente'}</button>
+</div></div></div>`;
+}
+function calcPreview(){
+  const age=parseInt(document.getElementById('fa').value)||0;
+  const w=parseFloat(document.getElementById('fw').value)||0;
+  const h=parseFloat(document.getElementById('fh').value)||0;
+  if(!age||!w||!h){alert('Preencha idade, peso e altura.');return;}
+  const r=iifym({age,w,h,bf:parseFloat(document.getElementById('fbf').value)||null,g:document.getElementById('fg').value,act:document.getElementById('fact').value,goal:document.getElementById('fgoal').value});
+  document.getElementById('iprev').style.display='block';
+  document.getElementById('ivals').innerHTML=`<div><div class="ii-v">${r.kcal}</div><div class="ii-l">kcal/dia</div></div><div><div class="ii-v">${r.cb}g</div><div class="ii-l">Carbos</div></div><div><div class="ii-v">${r.pr}g</div><div class="ii-l">Proteína</div></div><div><div class="ii-v">${r.ft}g</div><div class="ii-l">Lipídios</div></div><div><div class="ii-v">${r.tdee}</div><div class="ii-l">TDEE</div></div>`;
+  document.getElementById('imet').textContent=`${r.met} · BMR: ${r.bmr} kcal`;
+}
+function savePat(eid){
+  const n=document.getElementById('fn').value.trim();
+  if(!n){alert('Preencha o nome do paciente.');return;}
+  alert(`✅ Paciente "${n}" ${eid&&eid!=='null'?'atualizado':'cadastrado'} com sucesso!\n\nO app do paciente foi criado automaticamente.`);
+  closeModal();renderAdmin();
+}
+function delPat(id){if(!confirm('Excluir este paciente? Esta ação não pode ser desfeita.'))return;PATS.splice(PATS.findIndex(p=>p.id===id),1);closeModal();renderAdmin();}
+function closeModal(){document.getElementById('modal-root').innerHTML='';}
+
+// ══════════════════════════════════════════════════════════
+//  EVENTS
+// ══════════════════════════════════════════════════════════
+document.querySelectorAll('.si').forEach(b=>{b.onclick=()=>{S.adminPage=b.dataset.p;renderAdmin();};});
+document.querySelectorAll('.pn').forEach(b=>{b.onclick=()=>{S.patPage=b.dataset.pp;renderPatient();};});
+
+// Clock
+function tick(){const el=document.getElementById('ph-clock');if(el){const n=new Date();el.textContent=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');}}
+tick();setInterval(tick,15000);
+</script>
+</body>
+</html>
