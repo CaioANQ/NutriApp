@@ -1,10 +1,10 @@
 // backend/src/modules/ai/ai.service.ts
-// Módulo de IA — chave Anthropic NUNCA exposta ao frontend
-import Anthropic from '@anthropic-ai/sdk';
+// Módulo de IA — chave OpenAI NUNCA exposta ao frontend
 import { AppError } from '../../utils/errors';
 import { auditLog } from '../../utils/audit';
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+const OPENAI_API_URL = 'https://api.openai.com/v1/responses';
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5.4-mini';
 
 const SYSTEM_PROMPT = `Você é uma especialista em nutrição clínica funcional e medicina integrativa com PhD. 
 Você auxilia nutricionistas registrados no Brasil (CRN) com consultas técnicas baseadas em evidências científicas recentes.
@@ -23,9 +23,70 @@ interface AIMessage {
   content: string;
 }
 
+function toOpenAiInput(messages: AIMessage[], system = SYSTEM_PROMPT) {
+  return [
+    {
+      type: 'message',
+      role: 'developer',
+      content: [{ type: 'input_text', text: system }],
+    },
+    ...messages.map((message) => ({
+      type: 'message',
+      role: message.role,
+      content: [{ type: 'input_text', text: message.content }],
+    })),
+  ];
+}
+
+function extractOutputText(data: any): string {
+  if (typeof data.output_text === 'string' && data.output_text.trim()) {
+    return data.output_text;
+  }
+
+  const chunks: string[] = [];
+  for (const item of data.output || []) {
+    for (const content of item.content || []) {
+      if (content.type === 'output_text' && typeof content.text === 'string') {
+        chunks.push(content.text);
+      }
+    }
+  }
+  return chunks.join('');
+}
+
+async function createOpenAiText(messages: AIMessage[], maxOutputTokens: number): Promise<string> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new AppError('OPENAI_API_KEY não configurada no servidor.', 500);
+  }
+
+  const response = await fetch(OPENAI_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      input: toOpenAiInput(messages),
+      max_output_tokens: maxOutputTokens,
+    }),
+  });
+
+  const body = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    if (response.status === 429) {
+      throw new AppError('Limite de consultas à IA atingido. Aguarde.', 429);
+    }
+    throw new AppError(body?.error?.message || 'Erro ao consultar a OpenAI.', 502);
+  }
+
+  return extractOutputText(body) || 'A OpenAI retornou uma resposta sem texto.';
+}
+
 /**
  * Consulta a IA com histórico de conversa acumulado.
- * Streaming: retorna gerador async para resposta progressiva.
+ * Mantém assinatura async generator para compatibilidade com os routers existentes.
  */
 export async function* consultAI(
   messages: AIMessage[],
@@ -39,44 +100,21 @@ export async function* consultAI(
     throw new AppError('Mensagem muito longa (máx. 2000 caracteres).', 400);
   }
 
-  try {
-    const stream = client.messages.stream({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      })),
-    });
+  const text = await createOpenAiText(messages, 1024);
+  yield text;
 
-    for await (const event of stream) {
-      if (
-        event.type === 'content_block_delta' &&
-        event.delta.type === 'text_delta'
-      ) {
-        yield event.delta.text;
-      }
-    }
-
-    await auditLog({
-      userId,
-      action: 'DATA_ACCESS',
-      resource: 'ai_consultation',
-      ipAddress,
-      success: true,
-      metadata: { messageCount: messages.length },
-    });
-  } catch (err: any) {
-    if (err.status === 429) {
-      throw new AppError('Limite de consultas à IA atingido. Aguarde.', 429);
-    }
-    throw new AppError('Erro ao consultar a IA. Tente novamente.', 502);
-  }
+  await auditLog({
+    userId,
+    action: 'DATA_ACCESS',
+    resource: 'ai_consultation',
+    ipAddress,
+    success: true,
+    metadata: { messageCount: messages.length, provider: 'openai', model: OPENAI_MODEL },
+  });
 }
 
 /**
- * Sugestão de cardápio inteligente com alimentos da estação
+ * Sugestão de cardápio inteligente com alimentos da estação.
  */
 export async function suggestSeasonalMenu(
   patientConditions: string[],
@@ -91,14 +129,15 @@ Sugira 5 alimentos sazonais deste período que sejam terapêuticos para as condi
 Para cada alimento: nome, benefício específico e uma forma simples de incluir na dieta.
 Máximo 200 palavras. Seja prático e direto.`;
 
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 600,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: prompt }],
+  const text = await createOpenAiText([{ role: 'user', content: prompt }], 600);
+
+  await auditLog({
+    userId,
+    action: 'DATA_ACCESS',
+    resource: 'ai_seasonal',
+    success: true,
+    metadata: { provider: 'openai', model: OPENAI_MODEL },
   });
 
-  await auditLog({ userId, action: 'DATA_ACCESS', resource: 'ai_seasonal', success: true });
-
-  return response.content.map((b) => (b.type === 'text' ? b.text : '')).join('');
+  return text;
 }

@@ -188,5 +188,6 @@ Variáveis de produção obrigatórias:
   - JWT_REFRESH_SECRET: 64 bytes hex (diferente do access!)
   - ENCRYPTION_KEY: 32 bytes hex
   - DATABASE_URL: com SSL mode=require
-  - ANTHROPIC_API_KEY: server-side apenas
+  - OPENAI_API_KEY: server-side apenas
+  - OPENAI_MODEL: modelo usado pelo proxy de IA (padrão: gpt-5.4-mini)
 ```

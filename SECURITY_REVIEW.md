@@ -22,6 +22,7 @@ Data da revisão: 2026-04-23.
 4. Adicionei CSP e headers de segurança compatíveis com os HTMLs exportados.
 5. Adicionei rotas `/.well-known/dpo`, `/.well-known/security.txt`, `/api/lgpd/my-data` e `/api/lgpd/consents`.
 6. Adicionei `scripts/security-check.mjs` para impedir regressão de chaves ou chamadas de IA no frontend servido.
+7. Migrei o proxy server-side de IA para a OpenAI Responses API, usando `OPENAI_API_KEY` apenas no servidor.
 
 ## Limites Deliberados
 

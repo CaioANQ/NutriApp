@@ -783,7 +783,7 @@ async function sendAI(){
   if(inp)inp.value='';
   S.aiMsgs.push({r:'u',t:txt});S.aiLoad=true;renderAdmin();scrollAI();
   try{
-    const res=await fetch('/api/ai/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,system:'Você é especialista em nutrição clínica funcional. Responda de forma técnica mas clara para uma nutricionista. Para alimentos: por que é indicado, composto bioativo, mecanismo de ação, quantidade sugerida. Máx 250 palavras.',messages:S.aiMsgs.map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}))})});
+    const res=await fetch('/api/ai/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-5.4-mini',max_tokens:800,system:'Você é especialista em nutrição clínica funcional. Responda de forma técnica mas clara para uma nutricionista. Para alimentos: por que é indicado, composto bioativo, mecanismo de ação, quantidade sugerida. Máx 250 palavras.',messages:S.aiMsgs.map(m=>({role:m.r==='u'?'user':'assistant',content:m.t}))})});
     const d=await res.json();S.aiMsgs.push({r:'b',t:d.content.map(b=>b.text||'').join('')});
   }catch(e){S.aiMsgs.push({r:'b',t:'⚠️ Integração com IA disponível na versão de produção com configuração da API key.'});}
   S.aiLoad=false;renderAdmin();scrollAI();
@@ -791,7 +791,7 @@ async function sendAI(){
 function selPatho(pt){
   S.aiPatho=pt;S.aiMsgs.push({r:'u',t:`Melhores alimentos para ${pt} com mecanismos de ação bioquímicos.`});
   S.aiLoad=true;renderAdmin();scrollAI();
-  fetch('/api/ai/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,system:'Especialista em nutrição clínica. Para cada alimento: nome → composto ativo → mecanismo de ação → quantidade. Técnico para nutricionista. Máx 280 palavras.',messages:[{role:'user',content:`Alimentos terapêuticos para ${pt}: compostos ativos e mecanismos de ação bioquímicos.`}]})})
+  fetch('/api/ai/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'gpt-5.4-mini',max_tokens:800,system:'Especialista em nutrição clínica. Para cada alimento: nome → composto ativo → mecanismo de ação → quantidade. Técnico para nutricionista. Máx 280 palavras.',messages:[{role:'user',content:`Alimentos terapêuticos para ${pt}: compostos ativos e mecanismos de ação bioquímicos.`}]})})
     .then(r=>r.json()).then(d=>{S.aiMsgs.push({r:'b',t:d.content.map(b=>b.text||'').join('')});S.aiLoad=false;renderAdmin();scrollAI();})
     .catch(()=>{S.aiMsgs.push({r:'b',t:'⚠️ Integração com IA disponível na versão de produção.'});S.aiLoad=false;renderAdmin();});
 }

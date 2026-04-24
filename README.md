@@ -20,8 +20,8 @@ Abra pelo endereço exato:
 
 ## Segurança Aplicada
 
-- Proxy server-side para IA em `/api/ai/messages`; a chave `ANTHROPIC_API_KEY` nunca vai para o navegador.
-- Bloqueio das chamadas diretas a `https://api.anthropic.com` nas telas servidas.
+- Proxy server-side para IA em `/api/ai/messages`; a chave `OPENAI_API_KEY` nunca vai para o navegador.
+- Bloqueio das chamadas diretas a provedores de IA nas telas servidas.
 - Validação de origem para endpoints sensíveis.
 - Rate limit global, rate limit específico para IA e lockout gradual no login demo.
 - Headers: CSP, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, COOP/CORP.
@@ -30,12 +30,15 @@ Abra pelo endereço exato:
 
 ## IA Consultora
 
-Sem `ANTHROPIC_API_KEY`, a IA retorna uma mensagem local segura. Para habilitar respostas reais:
+Sem `OPENAI_API_KEY`, a IA retorna uma mensagem local segura. Para habilitar respostas reais, crie um `.env` local:
 
 ```bash
-export ANTHROPIC_API_KEY="sk-ant-..."
+cp .env.example .env
+# edite .env e preencha OPENAI_API_KEY
 npm run dev
 ```
+
+O arquivo `.env` não deve ser enviado ao GitHub.
 
 ## Observação de Produção
 

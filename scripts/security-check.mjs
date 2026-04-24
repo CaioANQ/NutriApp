@@ -8,6 +8,8 @@ const forbidden = [
   'anthropic-dangerous-direct-browser-access',
   'x-api-key',
   'https://api.anthropic.com',
+  'https://api.openai.com',
+  'OPENAI_API_KEY',
   'sessionStorage.setItem("nutri_api_key"',
 ];
 

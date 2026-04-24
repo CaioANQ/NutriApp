@@ -1,11 +1,41 @@
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, 'public');
+
+function loadDotEnv() {
+  try {
+    const file = readFileSync(path.join(__dirname, '.env'), 'utf8');
+    for (const line of file.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const separator = trimmed.indexOf('=');
+      if (separator === -1) continue;
+
+      const key = trimmed.slice(0, separator).trim();
+      let value = trimmed.slice(separator + 1).trim();
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  } catch {
+    // .env é opcional; em produção prefira variáveis do ambiente.
+  }
+}
+
+loadDotEnv();
+
 const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '127.0.0.1';
 const NODE_ENV = process.env.NODE_ENV || 'development';
@@ -248,12 +278,49 @@ function validateAiPayload(body) {
 
   return {
     payload: {
-      model: process.env.ANTHROPIC_MODEL || body.model || 'claude-sonnet-4-20250514',
-      max_tokens: Math.min(Number(body.max_tokens || 800), 1024),
+      model: process.env.OPENAI_MODEL || 'gpt-5.4-mini',
+      maxOutputTokens: Math.min(Number(body.max_tokens || body.max_output_tokens || 800), 1024),
       system: String(body.system || '').slice(0, 2_000),
       messages: safeMessages,
     },
   };
+}
+
+function toOpenAiInput(payload) {
+  const input = [];
+  if (payload.system) {
+    input.push({
+      type: 'message',
+      role: 'developer',
+      content: [{ type: 'input_text', text: payload.system }],
+    });
+  }
+
+  for (const message of payload.messages) {
+    input.push({
+      type: 'message',
+      role: message.role,
+      content: [{ type: 'input_text', text: message.content }],
+    });
+  }
+
+  return input;
+}
+
+function extractOpenAiText(data) {
+  if (typeof data.output_text === 'string' && data.output_text.trim()) {
+    return data.output_text;
+  }
+
+  const chunks = [];
+  for (const item of data.output || []) {
+    for (const content of item.content || []) {
+      if (content.type === 'output_text' && typeof content.text === 'string') {
+        chunks.push(content.text);
+      }
+    }
+  }
+  return chunks.join('');
 }
 
 async function handleAi(req, res) {
@@ -272,32 +339,56 @@ async function handleAi(req, res) {
     return sendJson(res, 400, { error: { message: error } });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.OPENAI_API_KEY) {
     return sendJson(res, 200, {
       id: 'local-demo',
       type: 'message',
       role: 'assistant',
       content: [{
         type: 'text',
-        text: 'IA protegida via backend. Configure ANTHROPIC_API_KEY no ambiente do servidor para habilitar respostas reais sem expor a chave no navegador.',
+        text: 'IA protegida via backend. Configure OPENAI_API_KEY no ambiente do servidor para habilitar respostas reais sem expor a chave no navegador.',
       }],
     });
   }
 
-  const upstream = await fetch('https://api.anthropic.com/v1/messages', {
+  const upstream = await fetch('https://api.openai.com/v1/responses', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': process.env.ANTHROPIC_VERSION || '2023-06-01',
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      model: payload.model,
+      input: toOpenAiInput(payload),
+      max_output_tokens: payload.maxOutputTokens,
+    }),
   });
 
   const responseBody = await upstream.text();
-  applySecurityHeaders(res, 'api');
-  res.writeHead(upstream.status, { 'Content-Type': 'application/json; charset=utf-8' });
-  res.end(responseBody);
+  let parsed;
+  try {
+    parsed = JSON.parse(responseBody);
+  } catch {
+    parsed = null;
+  }
+
+  if (!upstream.ok) {
+    return sendJson(res, upstream.status, {
+      error: {
+        message: parsed?.error?.message || 'Erro ao consultar a OpenAI.',
+      },
+    });
+  }
+
+  return sendJson(res, 200, {
+    id: parsed?.id || 'openai-response',
+    type: 'message',
+    role: 'assistant',
+    content: [{
+      type: 'text',
+      text: extractOpenAiText(parsed) || 'A OpenAI retornou uma resposta sem texto.',
+    }],
+  });
 }
 
 async function serveHtml(res, fileName) {

@@ -900,7 +900,7 @@ async function sendAI() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "claude-opus-4-5",
+        model: "gpt-5.4-mini",
         max_tokens: 1024,
         system: "Você é uma especialista em nutrição clínica funcional e medicina integrativa com PhD. Responda perguntas de uma nutricionista de forma técnica, baseada em evidências recentes, clara e objetiva. Para alimentos terapêuticos, sempre inclua: 1) Por que é indicado para a condição, 2) Compostos bioativos e mecanismo de ação bioquímico específico, 3) Quantidade/forma de consumo sugerida com justificativa. Use termos científicos corretos. Máximo 300 palavras por resposta. Estruture bem a resposta.",
         messages: S.aiMsgs.map(m => ({role: m.r === "user" ? "user" : "assistant", content: m.t}))
@@ -926,7 +926,7 @@ function selPatho(pt) {
   fetch("/api/ai/messages", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({model:"claude-opus-4-5",max_tokens:1024,system:"Especialista em nutrição clínica funcional. Para cada alimento: nome em negrito → composto ativo → mecanismo de ação bioquímico → quantidade sugerida com base em evidências. Técnico e objetivo para nutricionista. Máx 300 palavras.",messages:[{role:"user",content:`Melhores alimentos terapêuticos para ${pt}: liste os principais com compostos ativos e mecanismos de ação bioquímicos detalhados.`}]})
+    body: JSON.stringify({model:"gpt-5.4-mini",max_tokens:1024,system:"Especialista em nutrição clínica funcional. Para cada alimento: nome em negrito → composto ativo → mecanismo de ação bioquímico → quantidade sugerida com base em evidências. Técnico e objetivo para nutricionista. Máx 300 palavras.",messages:[{role:"user",content:`Melhores alimentos terapêuticos para ${pt}: liste os principais com compostos ativos e mecanismos de ação bioquímicos detalhados.`}]})
   })
   .then(r => { if (!r.ok) return r.json().then(e => { throw new Error(e.error?.message||`HTTP ${r.status}`); }); return r.json(); })
   .then(d => { S.aiMsgs.push({r:"bot", t: d.content.map(b=>b.text||"").join("")}); S.aiLoad = false; rp(); scrollAI(); })
