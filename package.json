@@ -5,9 +5,11 @@
   "type": "module",
   "description": "NutriApp exportado com servidor local seguro, proxy server-side de IA e artefatos visuais preservados.",
   "scripts": {
+    "build": "node scripts/security-check.mjs",
     "dev": "node server.mjs",
     "start": "node server.mjs",
-    "security:check": "node scripts/security-check.mjs"
+    "security:check": "node scripts/security-check.mjs",
+    "vercel-build": "node scripts/security-check.mjs"
   },
   "engines": {
     "node": ">=20"

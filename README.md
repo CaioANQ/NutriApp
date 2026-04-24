@@ -40,6 +40,30 @@ npm run dev
 
 O arquivo `.env` não deve ser enviado ao GitHub.
 
+## Deploy na Vercel
+
+O projeto já está adaptado para Vercel com `vercel.json` e funções serverless em `api/`.
+
+1. No painel da Vercel, clique em **Add New → Project**.
+2. Importe o repositório `CaioANQ/NutriApp`.
+3. Mantenha o framework como **Other**. O build command pode ficar como `npm run build`.
+4. Em **Environment Variables**, cadastre:
+   - `OPENAI_API_KEY`: sua chave real da OpenAI.
+   - `OPENAI_MODEL`: `gpt-5.4-mini`.
+   - `ENABLE_DEMO_AUTH`: `true` apenas enquanto usar o login demonstrativo.
+   - `DPO_EMAIL`, `SECURITY_EMAIL` e `PUBLIC_SECURITY_POLICY_URL` com seus contatos oficiais.
+5. Faça o deploy.
+
+Rotas publicadas:
+
+- `/` — MVP web completo
+- `/admin` — painel administrativo standalone
+- `/mobile` — mockup mobile
+- `/integrado` ou `/v3` — versão integrada
+- `/api/health` — verificação técnica
+- `/api/ai/messages` — proxy seguro da OpenAI
+- `/api/auth/login` — login demonstrativo protegido por origem/rate limit
+
 ## Observação de Produção
 
 Esta entrega preserva o design e a interatividade do protótipo. Para uso real com pacientes, use backend persistente com autenticação forte, banco criptografado, consentimento versionado, logs de auditoria imutáveis e processos formais de atendimento aos direitos do titular.

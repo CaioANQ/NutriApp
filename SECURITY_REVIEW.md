@@ -23,12 +23,15 @@ Data da revisão: 2026-04-23.
 5. Adicionei rotas `/.well-known/dpo`, `/.well-known/security.txt`, `/api/lgpd/my-data` e `/api/lgpd/consents`.
 6. Adicionei `scripts/security-check.mjs` para impedir regressão de chaves ou chamadas de IA no frontend servido.
 7. Migrei o proxy server-side de IA para a OpenAI Responses API, usando `OPENAI_API_KEY` apenas no servidor.
+8. Adaptei o deploy da Vercel com `vercel.json` e funções serverless equivalentes para login, IA, DPO, security.txt, health check e rotas LGPD.
 
 ## Limites Deliberados
 
 Os HTMLs usam scripts inline e handlers `onclick`. Para preservar 100% o desenho visual e a interatividade exportada, a CSP precisa permitir `'unsafe-inline'`. Em produção, o recomendado é migrar essa UI para React/Next sem handlers inline, usando nonce/hash estrito.
 
 As credenciais de demonstração continuam existindo para apresentação local, mas a autenticação demo é bloqueada em produção salvo `ENABLE_DEMO_AUTH=true`. Não use estes usuários com dados reais.
+
+Na Vercel, o rate limit em memória é uma proteção de borda demonstrativa e pode variar por instância serverless. Para produção real, use Redis/Upstash/KV ou WAF gerenciado para limite global consistente.
 
 ## Controles LGPD Relevantes
 
