@@ -316,6 +316,49 @@ input,select,textarea,button{font-family:'DM Sans',sans-serif;}
 .fi:focus{border-color:var(--sage2);box-shadow:0 0 0 3px rgba(74,128,96,.08);}
 textarea.fi{resize:vertical;min-height:65px;line-height:1.6;}
 select.fi{-webkit-appearance:none;cursor:pointer;}
+
+/* ── MOBILE RESPONSIVO ── */
+.menu-toggle{display:none;background:none;border:none;font-size:22px;color:var(--ink);cursor:pointer;padding:6px 10px;border-radius:8px;line-height:1;margin-right:4px;}
+.menu-toggle:hover{background:var(--mint-lt);}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(10,35,22,.55);z-index:90;}
+@media (max-width:768px){
+  body{overflow:auto;}
+  #root{height:auto;min-height:100vh;overflow:visible;}
+  .login-wrap{flex-direction:column;height:auto;min-height:100vh;}
+  .login-left{width:100%;padding:28px 24px 20px;}
+  .login-left::before,.login-left::after{display:none;}
+  .ll-brand{font-size:30px;margin-bottom:4px;}
+  .ll-sub{margin-bottom:14px;font-size:12px;}
+  .ll-feat{display:none;}
+  .login-right{width:100%;padding:26px 20px 40px;flex:none;}
+  .login-card{max-width:100%;}
+  .shell.show{flex-direction:row;height:100vh;}
+  .sb{position:fixed;top:0;bottom:0;left:0;z-index:100;width:240px;max-width:82vw;transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 24px rgba(0,0,0,.3);}
+  .sb.open{transform:translateX(0);}
+  .sb-overlay.show{display:block;}
+  .menu-toggle{display:inline-flex;align-items:center;justify-content:center;}
+  .main{width:100%;}
+  .topbar{padding:0 12px;gap:6px;height:52px;}
+  .tb-title{font-size:18px;}
+  .tb-btn{padding:6px 10px;font-size:11px;}
+  .content{padding:14px;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+  .stat-card{padding:14px;}
+  .stat-v{font-size:24px;}
+  .two,.three{grid-template-columns:1fr;gap:12px;}
+  .fb-layout{grid-template-columns:1fr;gap:12px;}
+  .ai-lay{grid-template-columns:1fr;height:auto;gap:12px;}
+  .ai-chat{height:60vh;min-height:380px;}
+  .builder{grid-template-columns:1fr;height:auto;gap:12px;}
+  .panel{height:auto;max-height:60vh;}
+  .pat-grid{grid-template-columns:1fr;}
+  .modal-bg{padding:0;align-items:flex-end;}
+  .modal{max-height:92vh;border-radius:18px 18px 0 0;width:100%;}
+  .frow,.frow.three{grid-template-columns:1fr;}
+  .pt-grid,.ii-grid{grid-template-columns:repeat(3,1fr);}
+  .demo-pills{gap:6px;}
+  .demo-pill{padding:6px 10px;font-size:11px;}
+}
 </style>
 </head>
 <body>
@@ -356,6 +399,7 @@ select.fi{-webkit-appearance:none;cursor:pointer;}
 
 <!-- ═══════════════════════════════ ADMIN SHELL ═══════════════════════════════ -->
 <div class="shell" id="admin-shell">
+  <div class="sb-overlay" id="sb-overlay" onclick="toggleSb(false)"></div>
   <aside class="sb">
     <div class="sb-brand">
       <div class="sb-logo">Nutri<em>App</em></div>
@@ -381,6 +425,7 @@ select.fi{-webkit-appearance:none;cursor:pointer;}
   </aside>
   <div class="main">
     <div class="topbar">
+      <button class="menu-toggle" type="button" onclick="toggleSb()" aria-label="Abrir menu">☰</button>
       <div class="tb-title" id="page-title">Dashboard</div>
       <div class="tb-right" id="tb-actions"></div>
     </div>
@@ -516,8 +561,21 @@ async function doLogin(){
   }
 }
 
+function toggleSb(open){
+  const sb=document.querySelector('#admin-shell .sb');
+  const ov=document.getElementById('sb-overlay');
+  if(!sb||!ov)return;
+  const willOpen=open===undefined?!sb.classList.contains('open'):open;
+  sb.classList.toggle('open',willOpen);
+  ov.classList.toggle('show',willOpen);
+}
+document.querySelectorAll('#admin-shell .si').forEach(item=>{
+  item.addEventListener('click',()=>{if(window.innerWidth<=768)toggleSb(false);});
+});
+
 function logout(){
   S.role=null;S.user=null;
+  toggleSb(false);
   document.getElementById('admin-shell').classList.remove('show');
   document.getElementById('patient-shell').classList.remove('show');
   document.getElementById('login-screen').style.display='flex';
